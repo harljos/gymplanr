@@ -9,7 +9,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "gymplanr",
 	Short: "Gymplanr is an application designed to create a full workout specifically for you without the hustle and bustle.",
-	Long: "Gymplanr is an application designed to create a full workout specifically for you without the hustle and bustle.",
+	Long:  "Gymplanr is an application designed to create a full workout specifically for you without the hustle and bustle.",
 }
 
 func Execute() {
