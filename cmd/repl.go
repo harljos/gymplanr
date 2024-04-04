@@ -9,15 +9,20 @@ import (
 
 type cliCommand struct {
 	name         string
-	descritption string
+	description string
 	callback     func(*config) error
 }
 
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    helpCommand,
+		},
 		"exit": {
 			name:         "exit",
-			descritption: "Exit gymplanr",
+			description: "Exit gymplanr",
 			callback:     exitCommand,
 		},
 	}
