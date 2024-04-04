@@ -28,3 +28,17 @@ func (cfg *config) createUserHandler(username, password string) (database.User, 
 
 	return user, nil
 }
+
+func (cfg *config) loginUserHandler(username, password string) (database.User, error) {
+	user, err := cfg.DB.GetUserByUsername(context.Background(), username)
+	if err != nil {
+		return database.User{}, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return database.User{}, err
+	}
+
+	return user, nil
+}
