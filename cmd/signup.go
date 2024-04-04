@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -11,11 +12,20 @@ var signUpCmd = &cobra.Command{
 	Short: "creates an account for gymplanr",
 	Long:  "creates an account for gymplanr",
 	Run: func(cmd *cobra.Command, args []string) {
-		user := StringPrompt("Username:")
-		fmt.Printf("Hello %s\n", user)
+		cfg, err := connectToDB()
+		if err != nil {
+			log.Fatal(err)
+		}
 
+		username := StringPrompt("Username:")
 		password := PasswordPrompt("Password:")
-		fmt.Printf("This is your password %s\n", password)
+
+		user, err := cfg.createUserHandler(username, password)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Thank you %s for signing up for gymplanr!\n", user.Username)
 	},
 }
 
