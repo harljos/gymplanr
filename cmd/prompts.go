@@ -36,3 +36,13 @@ func PasswordPrompt(label string) string {
 	fmt.Println()
 	return s
 }
+
+func usernamePrompt() string {
+	username := StringPrompt("Username:")
+	return username
+}
+
+func passwordPrompt() string {
+	password := PasswordPrompt("Password:")
+	return password
+}

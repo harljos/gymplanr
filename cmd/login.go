@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var signUpCmd = &cobra.Command{
-	Use:   "signUp",
-	Short: "creates an account for gymplanr",
-	Long:  "creates an account for gymplanr",
+var loginCmd = &cobra.Command{
+	Use:   "login",
+	Short: "logsin user",
+	Long:  "logsin user",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := connectToDB()
 		if err != nil {
@@ -20,15 +20,16 @@ var signUpCmd = &cobra.Command{
 		username := usernamePrompt()
 		password := passwordPrompt()
 
-		user, err := cfg.createUserHandler(username, password)
+		user, err := cfg.loginUserHandler(username, password)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Printf("Thank you %s for signing up for gymplanr!\n", user.Username)
+		fmt.Printf("Welcome %s\n", user.Username)
+		startRepl(&cfg)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(signUpCmd)
+	rootCmd.AddCommand(loginCmd)
 }
