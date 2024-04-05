@@ -2,7 +2,7 @@ package cmd
 
 import "fmt"
 
-func helpCommand(cfg *config) error {
+func helpCmd(cfg *config) error {
 	fmt.Println("\nWelcome to Gymplanr")
 	fmt.Println("Here are the available commands:")
 	commands := getCommands()

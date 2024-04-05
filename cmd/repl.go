@@ -18,12 +18,17 @@ func getCommands() map[string]cliCommand {
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
-			callback:    helpCommand,
+			callback:    helpCmd,
+		},
+		"generate": {
+			name:        "generate",
+			description: "Generates workout plan",
+			callback:    generateCmd,
 		},
 		"exit": {
 			name:         "exit",
 			description: "Exit gymplanr",
-			callback:     exitCommand,
+			callback:     exitCmd,
 		},
 	}
 }

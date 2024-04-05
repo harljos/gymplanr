@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"golang.org/x/term"
+	"github.com/manifoldco/promptui"
 )
 
 func StringPrompt(label string) string {
@@ -45,4 +46,18 @@ func usernamePrompt() string {
 func passwordPrompt() string {
 	password := PasswordPrompt("Password:")
 	return password
+}
+
+func SelectPrompt(label string, items []string) (string, error) {
+	prompt := promptui.Select{
+		Label: label,
+		Items: items,
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	return result, err
 }
