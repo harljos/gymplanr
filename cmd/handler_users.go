@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,12 +33,12 @@ func (cfg *config) createUserHandler(username, password string) (database.User, 
 func (cfg *config) loginUserHandler(username, password string) (database.User, error) {
 	user, err := cfg.DB.GetUserByUsername(context.Background(), username)
 	if err != nil {
-		return database.User{}, err
+		return database.User{}, errors.New("user not found")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return database.User{}, err
+		return database.User{}, errors.New("incorrect password")
 	}
 
 	return user, nil

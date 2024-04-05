@@ -61,6 +61,7 @@ func startRepl(cfg *config) {
 		if err != nil {
 			fmt.Println(err)
 		}
+		fmt.Println()
 	}
 }
 
