@@ -6,13 +6,15 @@ import (
 	"os"
 
 	"github.com/harljos/gymplanr/internal/database"
+	"github.com/harljos/gymplanr/internal/exerciseapi"
 	"github.com/joho/godotenv"
 
 	_ "github.com/lib/pq"
 )
 
 type config struct {
-	DB *database.Queries
+	DB             *database.Queries
+	exerciseClient exerciseapi.Client
 }
 
 func connectToDB() (config, error) {
@@ -30,6 +32,7 @@ func connectToDB() (config, error) {
 
 	cfg := config{
 		DB: database.New(db),
+		exerciseClient: exerciseapi.NewClient(),
 	}
 
 	return cfg, nil
