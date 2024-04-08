@@ -18,6 +18,17 @@ type Day struct {
 	UpdatedAt time.Time
 }
 
+type Exercise struct {
+	ID           uuid.UUID
+	Name         string
+	Muscle       string
+	Repetitions  int32
+	Instructions string
+	DayID        uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
 type User struct {
 	ID        uuid.UUID
 	Username  string
