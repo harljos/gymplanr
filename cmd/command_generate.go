@@ -1,7 +1,5 @@
 package cmd
 
-import "fmt"
-
 func generateCmd(cfg *config) error {
 	results := make(map[string]string)
 
@@ -36,8 +34,6 @@ func generateCmd(cfg *config) error {
 		return err
 	}
 	results["hours"] = result
-
-	fmt.Println(results)
 
 	return nil
 }
