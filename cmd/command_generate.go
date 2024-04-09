@@ -1,6 +1,11 @@
 package cmd
 
-import "github.com/harljos/gymplanr/internal/database"
+import (
+	"log"
+	"sync"
+
+	"github.com/harljos/gymplanr/internal/database"
+)
 
 func generateCmd(cfg *config, user database.User) error {
 	results := make(map[string]string)
@@ -39,12 +44,46 @@ func generateCmd(cfg *config, user database.User) error {
 
 	workoutDays := getWorkoutDays(results)
 
-	_, err = cfg.createDays(workoutDays, user)
+	databaseDays, err := cfg.createDays(workoutDays, user)
 	if err != nil {
 		return err
 	}
 
+	go generateWorkout(cfg, databaseDays, results)
+
 	return nil
+}
+
+func generateWorkout(cfg *config, days []database.Day, results map[string]string) {
+	wg := &sync.WaitGroup{}
+	for _, day := range days {
+		wg.Add(1)
+
+		go getExercises(cfg, wg, day, results)
+	}
+	wg.Wait()
+}
+
+func getExercises(cfg *config, wg *sync.WaitGroup, day database.Day, results map[string]string) {
+	defer wg.Done()
+
+	difficulty := results["difficulty"]
+	exerciseType := results["exerciseType"]
+	muscles := []string{"chest", "shoulders", "middle_back", "glutes", "hamstrings", "quadriceps"}
+
+	for _, muscle := range muscles {
+		exercise, err := cfg.exerciseClient.GetExercise(muscle, difficulty, exerciseType)
+		if err != nil {
+			log.Printf("couldn't fetch exercise: %v\n", err)
+			continue
+		}
+
+		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, 10, day)
+		if err != nil {
+			log.Printf("couldn't create exercise: %v\n", err)
+			continue
+		}
+	}
 }
 
 func getWorkoutDays(results map[string]string) []string {
