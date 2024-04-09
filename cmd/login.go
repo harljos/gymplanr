@@ -26,7 +26,7 @@ var loginCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Welcome to Gymplanr %s!\n", user.Username)
-		startRepl(&cfg)
+		startRepl(&cfg, user)
 	},
 }
 

@@ -1,8 +1,12 @@
 package cmd
 
-import "fmt"
+import (
+	"fmt"
 
-func helpCmd(cfg *config) error {
+	"github.com/harljos/gymplanr/internal/database"
+)
+
+func helpCmd(cfg *config, user database.User) error {
 	fmt.Println("\nWelcome to Gymplanr")
 	fmt.Println("Here are the available commands:")
 	commands := getCommands()

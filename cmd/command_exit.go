@@ -1,8 +1,12 @@
 package cmd
 
-import "os"
+import (
+	"os"
 
-func exitCmd(cfg *config) error {
+	"github.com/harljos/gymplanr/internal/database"
+)
+
+func exitCmd(cfg *config, user database.User) error {
 	os.Exit(0)
 	return nil
 }

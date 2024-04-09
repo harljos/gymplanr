@@ -1,6 +1,8 @@
 package cmd
 
-func generateCmd(cfg *config) error {
+import "github.com/harljos/gymplanr/internal/database"
+
+func generateCmd(cfg *config, user database.User) error {
 	results := make(map[string]string)
 
 	difficulty := []string{"beginner", "intermediate", "expert"}
@@ -35,5 +37,33 @@ func generateCmd(cfg *config) error {
 	}
 	results["hours"] = result
 
+	workoutDays := getWorkoutDays(results)
+
+	_, err = cfg.createDays(workoutDays, user)
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func getWorkoutDays(results map[string]string) []string {
+	days, ok := results["days"]
+	if !ok {
+		return []string{}
+	}
+
+	if days == "3" {
+		return []string{"Monday", "Wednesday", "Friday"}
+	}
+	if days == "4" {
+		return []string{"Monday", "Tuesday", "Thursday", "Friday"}
+	}
+	if days == "5" {
+		return []string{"Monday", "Tuesday", "Wednesday", "Friday", "Saturday"}
+	}
+	if days == "6" {
+		return []string{"Monday", "Tuesday", "Wednesday", "Thurday", "Friday", "Saturday"}
+	}
+	return []string{}
 }

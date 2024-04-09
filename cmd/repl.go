@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/harljos/gymplanr/internal/database"
 )
 
 type cliCommand struct {
 	name         string
 	description string
-	callback     func(*config) error
+	callback     func(*config, database.User) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -33,7 +35,7 @@ func getCommands() map[string]cliCommand {
 	}
 }
 
-func startRepl(cfg *config) {
+func startRepl(cfg *config, user database.User) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -57,7 +59,7 @@ func startRepl(cfg *config) {
 			continue
 		}
 
-		err := command.callback(cfg)
+		err := command.callback(cfg, user)
 		if err != nil {
 			fmt.Println(err)
 		}
