@@ -9,7 +9,16 @@ type Client struct {
 	httpClient http.Client
 }
 
-type Exercise []struct {
+type Exercises []struct {
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	Muscle       string `json:"muscle"`
+	Equipment    string `json:"equipment"`
+	Difficulty   string `json:"difficulty"`
+	Instructions string `json:"instructions"`
+}
+
+type Exercise struct {
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	Muscle       string `json:"muscle"`

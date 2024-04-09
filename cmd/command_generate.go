@@ -37,16 +37,6 @@ func generateCmd(cfg *config) error {
 	}
 	results["hours"] = result
 
-	muscle := []string{"abdominals", "biceps", "calves",
-		"chest", "forearms", "glutes", "hamstrings", "lats", "lower back",
-		"middle back", "quadriceps", "traps", "triceps", "none"}
-
-	result, err = SelectPrompt("Pick a muscle to focus on", muscle)
-	if err != nil {
-		return err
-	}
-	results["muscle"] = result
-
 	fmt.Println(results)
 
 	return nil

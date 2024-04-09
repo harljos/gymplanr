@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 
@@ -12,7 +13,7 @@ import (
 )
 
 func (c *Client) GetExercise(muscle, difficulty, exerciseType string) (Exercise, error) {
-	url := fmt.Sprintf("https://api.api-ninjas.com/v1/exercises?muscle%s&difficulty=%s&type=%s", muscle, difficulty, exerciseType)
+	url := fmt.Sprintf("https://api.api-ninjas.com/v1/exercises?muscle=%s&difficulty=%s&type=%s", muscle, difficulty, exerciseType)
 
 	godotenv.Load(".env")
 
@@ -42,11 +43,13 @@ func (c *Client) GetExercise(muscle, difficulty, exerciseType string) (Exercise,
 		return Exercise{}, err
 	}
 
-	exercise := Exercise{}
+	exercise := Exercises{}
 	err = json.Unmarshal(data, &exercise)
 	if err != nil {
 		return Exercise{}, err
 	}
 
-	return exercise, nil
+	exerciseChosen := rand.Intn(9 - 0) + 0
+
+	return exercise[exerciseChosen], nil
 }
