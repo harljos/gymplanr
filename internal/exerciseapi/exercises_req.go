@@ -15,6 +15,19 @@ import (
 func (c *Client) GetExercise(muscle, difficulty, exerciseType string) (Exercise, error) {
 	url := fmt.Sprintf("https://api.api-ninjas.com/v1/exercises?muscle=%s&difficulty=%s&type=%s", muscle, difficulty, exerciseType)
 
+	exerciseChosen := rand.Intn(9 - 0) + 0
+
+	data, ok := c.cache.Get(url)
+	if ok {
+		exercises := Exercises{}
+		err := json.Unmarshal(data, &exercises)
+		if err != nil {
+			return Exercise{}, err
+		}
+		
+		return exercises[exerciseChosen], nil
+	}
+
 	godotenv.Load(".env")
 
 	apiKey := os.Getenv("API_KEY")
@@ -38,18 +51,18 @@ func (c *Client) GetExercise(muscle, difficulty, exerciseType string) (Exercise,
 		return Exercise{}, fmt.Errorf("bad status code: %v", resp.StatusCode)
 	}
 
-	data, err := io.ReadAll(resp.Body)
+	data, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return Exercise{}, err
 	}
 
-	exercise := Exercises{}
-	err = json.Unmarshal(data, &exercise)
+	exercises := Exercises{}
+	err = json.Unmarshal(data, &exercises)
 	if err != nil {
 		return Exercise{}, err
 	}
 
-	exerciseChosen := rand.Intn(9 - 0) + 0
+	c.cache.Add(url, data)
 
-	return exercise[exerciseChosen], nil
+	return exercises[exerciseChosen], nil
 }

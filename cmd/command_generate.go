@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -69,6 +70,8 @@ func generateCmd(cfg *config, user database.User) error {
 	}
 
 	go generateWorkout(cfg, databaseDays, results)
+
+	fmt.Println("Your workout plan has been generated")
 
 	return nil
 }
