@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/harljos/gymplanr/internal/database"
 	"github.com/harljos/gymplanr/internal/exerciseapi"
@@ -32,7 +33,7 @@ func connectToDB() (config, error) {
 
 	cfg := config{
 		DB: database.New(db),
-		exerciseClient: exerciseapi.NewClient(),
+		exerciseClient: exerciseapi.NewClient(time.Minute * 30),
 	}
 
 	return cfg, nil
