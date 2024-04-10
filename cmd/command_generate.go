@@ -7,40 +7,59 @@ import (
 	"github.com/harljos/gymplanr/internal/database"
 )
 
+const (
+	difficultyKey   = "difficulty"
+	exerciseTypeKey = "exerciseType"
+	daysKey         = "days"
+	hoursKey        = "hours"
+)
+
 func generateCmd(cfg *config, user database.User) error {
+	days, err := cfg.getDaysByUser(user)
+	if err != nil {
+		return err
+	}
+
+	if days != nil {
+		err = cfg.deleteDays(user)
+		if err != nil {
+			return err
+		}
+	}
+
 	results := make(map[string]string)
 
-	difficulty := []string{"beginner", "intermediate", "expert"}
+	difficultyPrompt := []string{"beginner", "intermediate", "expert"}
 
-	result, err := SelectPrompt("What would you like the difficulty of the exercises to be?", difficulty)
+	result, err := SelectPrompt("What would you like the difficulty of the exercises to be?", difficultyPrompt)
 	if err != nil {
 		return err
 	}
-	results["difficulty"] = result
+	results[difficultyKey] = result
 
-	exerciseType := []string{"strength", "cardio", "both"}
+	exerciseTypePrompt := []string{"strength", "cardio", "both"}
 
-	result, err = SelectPrompt("what would you like your exercise plan to be based around?", exerciseType)
+	result, err = SelectPrompt("what would you like your exercise plan to be based around?", exerciseTypePrompt)
 	if err != nil {
 		return err
 	}
-	results["exerciseType"] = result
+	results[exerciseTypeKey] = result
 
-	days := []string{"3", "4", "5", "6"}
+	daysPrompt := []string{"3", "4", "5", "6"}
 
-	result, err = SelectPrompt("How many days a week do you want to work out?", days)
+	result, err = SelectPrompt("How many days a week do you want to work out?", daysPrompt)
 	if err != nil {
 		return err
 	}
-	results["days"] = result
+	results[daysKey] = result
 
-	hours := []string{"30", "45", "60", "75"}
+	hoursPrompt := []string{"30", "45", "60", "75"}
 
-	result, err = SelectPrompt("How many minutes do you want each workout to be?", hours)
+	result, err = SelectPrompt("How many minutes do you want each workout to be?", hoursPrompt)
 	if err != nil {
 		return err
 	}
-	results["hours"] = result
+	results[hoursKey] = result
 
 	workoutDays := getWorkoutDays(results)
 
@@ -67,12 +86,10 @@ func generateWorkout(cfg *config, days []database.Day, results map[string]string
 func getExercises(cfg *config, wg *sync.WaitGroup, day database.Day, results map[string]string) {
 	defer wg.Done()
 
-	difficulty := results["difficulty"]
-	exerciseType := results["exerciseType"]
 	muscles := []string{"chest", "shoulders", "middle_back", "glutes", "hamstrings", "quadriceps"}
 
 	for _, muscle := range muscles {
-		exercise, err := cfg.exerciseClient.GetExercise(muscle, difficulty, exerciseType)
+		exercise, err := cfg.exerciseClient.GetExercise(muscle, results[difficultyKey], results[exerciseTypeKey])
 		if err != nil {
 			log.Printf("couldn't fetch exercise: %v\n", err)
 			continue
@@ -87,7 +104,7 @@ func getExercises(cfg *config, wg *sync.WaitGroup, day database.Day, results map
 }
 
 func getWorkoutDays(results map[string]string) []string {
-	days, ok := results["days"]
+	days, ok := results[daysKey]
 	if !ok {
 		return []string{}
 	}

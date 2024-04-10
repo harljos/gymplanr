@@ -36,3 +36,21 @@ func (cfg *config) createDay(dayName string, user database.User) (database.Day, 
 
 	return day, nil
 }
+
+func (cfg *config) getDaysByUser(user database.User) ([]database.Day, error) {
+	days, err := cfg.DB.GetDaysByUser(context.Background(), user.ID)
+	if err != nil {
+		return []database.Day{}, err
+	}
+
+	return days, nil
+}
+
+func (cfg *config) deleteDays(user database.User) error {
+	err := cfg.DB.DeleteDays(context.Background(), user.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
