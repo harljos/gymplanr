@@ -22,9 +22,14 @@ func generateCmd(cfg *config, user database.User) error {
 	}
 
 	if days != nil {
-		err = cfg.deleteDays(user)
-		if err != nil {
-			return err
+		ok := YesNoPrompt("Continuing will delete your current workout routine. Do you wish to continue", true)
+		if ok {
+			err = cfg.deleteDays(user)
+			if err != nil {
+				return err
+			}
+		} else {
+			return nil
 		}
 	}
 
