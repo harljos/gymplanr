@@ -67,7 +67,10 @@ func generateCmd(cfg *config, user database.User) error {
 	}
 	results[hoursKey] = result
 
-	workoutDays := getWorkoutDays(results)
+	workoutDays, err := getWorkoutDays(results)
+	if err != nil {
+		return err
+	}
 
 	databaseDays, err := cfg.createDays(workoutDays, user)
 	if err != nil {
@@ -109,25 +112,4 @@ func getExercises(cfg *config, wg *sync.WaitGroup, day database.Day, results map
 			continue
 		}
 	}
-}
-
-func getWorkoutDays(results map[string]string) []string {
-	days, ok := results[daysKey]
-	if !ok {
-		return []string{}
-	}
-
-	if days == "3" {
-		return []string{"Monday", "Wednesday", "Friday"}
-	}
-	if days == "4" {
-		return []string{"Monday", "Tuesday", "Thursday", "Friday"}
-	}
-	if days == "5" {
-		return []string{"Monday", "Tuesday", "Wednesday", "Friday", "Saturday"}
-	}
-	if days == "6" {
-		return []string{"Monday", "Tuesday", "Wednesday", "Thurday", "Friday", "Saturday"}
-	}
-	return []string{}
 }

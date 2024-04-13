@@ -2,17 +2,24 @@ package cmd
 
 import (
 	"context"
+	"errors"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/harljos/gymplanr/internal/database"
 )
 
-func (cfg *config) createDays(days []string, user database.User) ([]database.Day, error) {
+type Day struct {
+	dayName string
+	muscles []string
+}
+
+func (cfg *config) createDays(days []Day, user database.User) ([]database.Day, error) {
 	databaseDays := []database.Day{}
 
-	for _, dayName := range days {
-		day, err := cfg.createDay(dayName, user)
+	for _, d := range days {
+		day, err := cfg.createDay(d.dayName, user)
 		if err != nil {
 			return []database.Day{}, err
 		}
@@ -53,4 +60,123 @@ func (cfg *config) deleteDays(user database.User) error {
 	}
 
 	return nil
+}
+
+func getWorkoutDays(results map[string]string) ([]Day, error) {
+	days, ok := results[daysKey]
+	if !ok {
+		return []Day{}, errors.New("day result not found")
+	}
+
+	minutes, err := strconv.Atoi(results[hoursKey])
+	if err != nil {
+		return []Day{}, err
+	}
+	minPerExercise := 7
+
+	fullBodyMuscles := []string{"chest", "lats", "hamstrings", "glutes", "shoulders", "qudriceps", "bicep", "calves", "tricep"}
+	upperMuscles := []string{"chest", "lats", "shoulders", "bicep", "tricep", "middle_back"}
+	pushMuscles := []string{"chest", "shoulders", "tricep"}
+	pullMuscles := []string{"lats", "bicep", "middle_back", "lower_back", "traps"}
+	legMuscles := []string{"hamstrings", "glutes", "quadriceps", "calves"}
+
+	if days == "3" {
+		return []Day{
+			{
+				dayName: "Monday",
+				muscles: checkOutOfBounds(fullBodyMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Wednesday",
+				muscles: checkOutOfBounds(fullBodyMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Friday",
+				muscles: checkOutOfBounds(fullBodyMuscles, minutes/minPerExercise),
+			},
+		}, nil
+	}
+	if days == "4" {
+		return []Day{
+			{
+				dayName: "Monday",
+				muscles: checkOutOfBounds(upperMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Tuesday",
+				muscles: checkOutOfBounds(legMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Thursday",
+				muscles: checkOutOfBounds(upperMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Friday",
+				muscles: checkOutOfBounds(legMuscles, minutes/minPerExercise),
+			},
+		}, nil
+	}
+	if days == "5" {
+		return []Day{
+			{
+				dayName: "Monday",
+				muscles: checkOutOfBounds(pushMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Tuesday",
+				muscles: checkOutOfBounds(pullMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Wednesday",
+				muscles: checkOutOfBounds(legMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Friday",
+				muscles: checkOutOfBounds(pushMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Saturday",
+				muscles: checkOutOfBounds(pullMuscles, minutes/minPerExercise),
+			},
+		}, nil
+	}
+	if days == "6" {
+		return []Day{
+			{
+				dayName: "Monday",
+				muscles: checkOutOfBounds(pushMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Tuesday",
+				muscles: checkOutOfBounds(pullMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Wednesday",
+				muscles: checkOutOfBounds(legMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Thursday",
+				muscles: checkOutOfBounds(pushMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Friday",
+				muscles: checkOutOfBounds(pullMuscles, minutes/minPerExercise),
+			},
+			{
+				dayName: "Saturday",
+				muscles: checkOutOfBounds(legMuscles, minutes/minPerExercise),
+			},
+		}, nil
+	}
+	return []Day{}, errors.New("no days found")
+}
+
+func checkOutOfBounds(muscles []string, exercises int) []string {
+	if len(muscles) >= exercises {
+		return muscles[0:exercises]
+	}
+
+	muscles = append(muscles, muscles...)
+
+	return checkOutOfBounds(muscles, exercises)
 }
