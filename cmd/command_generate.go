@@ -13,6 +13,7 @@ const (
 	exerciseTypeKey = "exerciseType"
 	daysKey         = "days"
 	hoursKey        = "hours"
+	cardioKey       = "cardio"
 )
 
 func generateCmd(cfg *config, user database.User) error {
@@ -35,21 +36,23 @@ func generateCmd(cfg *config, user database.User) error {
 
 	results := make(map[string]string)
 
-	difficultyPrompt := []string{"beginner", "intermediate", "expert"}
-
-	result, err := SelectPrompt("What would you like the difficulty of the exercises to be?", difficultyPrompt)
-	if err != nil {
-		return err
-	}
-	results[difficultyKey] = result
-
 	exerciseTypePrompt := []string{"strength", "cardio", "both"}
 
-	result, err = SelectPrompt("what would you like your exercise plan to be based around?", exerciseTypePrompt)
+	result, err := SelectPrompt("what would you like your exercise plan to be based around?", exerciseTypePrompt)
 	if err != nil {
 		return err
 	}
 	results[exerciseTypeKey] = result
+
+	if results[exerciseTypeKey] == "strength" || results[exerciseTypeKey] == "both" {
+		difficultyPrompt := []string{"beginner", "intermediate", "expert"}
+
+		result, err = SelectPrompt("What would you like the difficulty of the strength exercises to be?", difficultyPrompt)
+		if err != nil {
+			return err
+		}
+		results[difficultyKey] = result
+	}
 
 	daysPrompt := []string{"3", "4", "5", "6"}
 
@@ -59,13 +62,39 @@ func generateCmd(cfg *config, user database.User) error {
 	}
 	results[daysKey] = result
 
-	hoursPrompt := []string{"30", "45", "60", "75"}
+	if results[exerciseTypeKey] == "both" {
+		hoursPrompt := []string{"30", "45", "60", "75"}
 
-	result, err = SelectPrompt("How many minutes do you want each workout to be?", hoursPrompt)
-	if err != nil {
-		return err
+		result, err = SelectPrompt("How many minutes do you want each workout to be (cardio not included)?", hoursPrompt)
+		if err != nil {
+			return err
+		}
+		results[hoursKey] = result
+
+		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
+
+		result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
+		if err != nil {
+			return err
+		}
+		results[cardioKey] = result
+	} else if results[exerciseTypeKey] == "strength" {
+		hoursPrompt := []string{"30", "45", "60", "75"}
+
+		result, err = SelectPrompt("How many minutes do you want each workout to be?", hoursPrompt)
+		if err != nil {
+			return err
+		}
+		results[hoursKey] = result
+	} else {
+		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
+
+		result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
+		if err != nil {
+			return err
+		}
+		results[cardioKey] = result
 	}
-	results[hoursKey] = result
 
 	workoutDays, err := getWorkoutDays(results)
 	if err != nil {
@@ -97,8 +126,19 @@ func generateWorkout(cfg *config, user database.User, days []Day, results map[st
 func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, results map[string]string) {
 	defer wg.Done()
 
+	if results[exerciseTypeKey] == "strength" {
+		generateStrengthExercises(cfg, user, day, results)
+	} else if results[exerciseTypeKey] == "cardio" {
+		generateCardioExercise(cfg, user, day)
+	} else {
+		generateStrengthExercises(cfg, user, day, results)
+		generateCardioExercise(cfg, user, day)
+	}
+}
+
+func generateStrengthExercises(cfg *config, user database.User, day Day, results map[string]string) {
 	for _, muscle := range day.muscles {
-		exercise, err := cfg.exerciseClient.GetExercise(muscle, results[difficultyKey], results[exerciseTypeKey])
+		exercise, err := cfg.exerciseClient.GetExercise(muscle, results[difficultyKey], "strength")
 		if err != nil {
 			log.Printf("couldn't fetch exercise: %v\n", err)
 			continue
@@ -116,4 +156,24 @@ func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, 
 			continue
 		}
 	}
+}
+
+func generateCardioExercise(cfg *config, user database.User, day Day) {
+	exercise, err := cfg.exerciseClient.GetCardioExercise()
+		if err != nil {
+			log.Printf("couldn't fetch exercise: %v\n", err)
+			return
+		}
+
+		databaseDay, err := cfg.getDayByUser(user, day.dayName)
+		if err != nil {
+			log.Printf("couldn't get day from database: %v\n", err)
+			return
+		}
+
+		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, 0, databaseDay)
+		if err != nil {
+			log.Printf("couldn't create exercise: %v\n", err)
+			return
+		}
 }
