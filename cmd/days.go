@@ -62,6 +62,18 @@ func (cfg *config) deleteDays(user database.User) error {
 	return nil
 }
 
+func (cfg *config) getDayByUser(user database.User, dayName string) (database.Day, error) {
+	day, err := cfg.DB.GetDayByNameForUser(context.Background(), database.GetDayByNameForUserParams{
+		Name: dayName,
+		UserID: user.ID,
+	})
+	if err != nil {
+		return database.Day{}, err
+	}
+
+	return day, nil
+}
+
 func getWorkoutDays(results map[string]string) ([]Day, error) {
 	days, ok := results[daysKey]
 	if !ok {
@@ -74,10 +86,10 @@ func getWorkoutDays(results map[string]string) ([]Day, error) {
 	}
 	minPerExercise := 7
 
-	fullBodyMuscles := []string{"chest", "lats", "hamstrings", "glutes", "shoulders", "qudriceps", "bicep", "calves", "tricep"}
-	upperMuscles := []string{"chest", "lats", "shoulders", "bicep", "tricep", "middle_back"}
-	pushMuscles := []string{"chest", "shoulders", "tricep"}
-	pullMuscles := []string{"lats", "bicep", "middle_back", "lower_back", "traps"}
+	fullBodyMuscles := []string{"chest", "lats", "hamstrings", "glutes", "shoulders", "quadriceps", "biceps", "calves", "triceps"}
+	upperMuscles := []string{"chest", "lats", "shoulders", "biceps", "triceps", "middle_back"}
+	pushMuscles := []string{"chest", "shoulders", "triceps"}
+	pullMuscles := []string{"lats", "biceps", "middle_back", "lower_back", "traps"}
 	legMuscles := []string{"hamstrings", "glutes", "quadriceps", "calves"}
 
 	if days == "3" {

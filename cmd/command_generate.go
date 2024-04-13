@@ -72,41 +72,45 @@ func generateCmd(cfg *config, user database.User) error {
 		return err
 	}
 
-	databaseDays, err := cfg.createDays(workoutDays, user)
+	_, err = cfg.createDays(workoutDays, user)
 	if err != nil {
 		return err
 	}
 
-	go generateWorkout(cfg, databaseDays, results)
+	go generateWorkout(cfg, user, workoutDays, results)
 
 	fmt.Println("Your workout plan has been generated")
 
 	return nil
 }
 
-func generateWorkout(cfg *config, days []database.Day, results map[string]string) {
+func generateWorkout(cfg *config, user database.User, days []Day, results map[string]string) {
 	wg := &sync.WaitGroup{}
 	for _, day := range days {
 		wg.Add(1)
 
-		go getExercises(cfg, wg, day, results)
+		go getExercises(cfg, wg, user, day, results)
 	}
 	wg.Wait()
 }
 
-func getExercises(cfg *config, wg *sync.WaitGroup, day database.Day, results map[string]string) {
+func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, results map[string]string) {
 	defer wg.Done()
 
-	muscles := []string{"chest", "shoulders", "middle_back", "glutes", "hamstrings", "quadriceps"}
-
-	for _, muscle := range muscles {
+	for _, muscle := range day.muscles {
 		exercise, err := cfg.exerciseClient.GetExercise(muscle, results[difficultyKey], results[exerciseTypeKey])
 		if err != nil {
 			log.Printf("couldn't fetch exercise: %v\n", err)
 			continue
 		}
 
-		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, 10, day)
+		databaseDay, err := cfg.getDayByUser(user, day.dayName)
+		if err != nil {
+			log.Printf("couldn't get day from database: %v\n", err)
+			continue
+		}
+
+		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, 10, databaseDay)
 		if err != nil {
 			log.Printf("couldn't create exercise: %v\n", err)
 			continue

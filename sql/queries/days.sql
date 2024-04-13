@@ -9,3 +9,7 @@ WHERE days.user_id = $1;
 
 -- name: DeleteDays :exec
 DELETE FROM days WHERE days.user_id = $1;
+
+-- name: GetDayByNameForUser :one
+SELECT * FROM days
+WHERE days.name = $1 AND days.user_id = $2;

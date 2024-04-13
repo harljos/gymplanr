@@ -54,6 +54,29 @@ func (q *Queries) DeleteDays(ctx context.Context, userID uuid.UUID) error {
 	return err
 }
 
+const getDayByNameForUser = `-- name: GetDayByNameForUser :one
+SELECT id, name, user_id, created_at, updated_at FROM days
+WHERE days.name = $1 AND days.user_id = $2
+`
+
+type GetDayByNameForUserParams struct {
+	Name   string
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetDayByNameForUser(ctx context.Context, arg GetDayByNameForUserParams) (Day, error) {
+	row := q.db.QueryRowContext(ctx, getDayByNameForUser, arg.Name, arg.UserID)
+	var i Day
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getDaysByUser = `-- name: GetDaysByUser :many
 SELECT id, name, user_id, created_at, updated_at FROM days
 WHERE days.user_id = $1
