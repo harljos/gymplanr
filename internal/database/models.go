@@ -5,6 +5,7 @@
 package database
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,14 +20,17 @@ type Day struct {
 }
 
 type Exercise struct {
-	ID           uuid.UUID
-	Name         string
-	Muscle       string
-	Repetitions  int32
-	Instructions string
-	DayID        uuid.UUID
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID               uuid.UUID
+	Name             string
+	Muscle           string
+	Sets             sql.NullInt32
+	Repetitions      sql.NullInt32
+	ExerciseDuration sql.NullInt32
+	Instructions     string
+	ExerciseType     string
+	DayID            uuid.UUID
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type User struct {

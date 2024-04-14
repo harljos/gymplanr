@@ -7,26 +7,30 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 const createExercise = `-- name: CreateExercise :one
-INSERT INTO exercises (id, name, muscle, repetitions, instructions, day_id, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, name, muscle, repetitions, instructions, day_id, created_at, updated_at
+INSERT INTO exercises (id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, day_id, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, day_id, created_at, updated_at
 `
 
 type CreateExerciseParams struct {
-	ID           uuid.UUID
-	Name         string
-	Muscle       string
-	Repetitions  int32
-	Instructions string
-	DayID        uuid.UUID
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID               uuid.UUID
+	Name             string
+	Muscle           string
+	Sets             sql.NullInt32
+	Repetitions      sql.NullInt32
+	ExerciseDuration sql.NullInt32
+	Instructions     string
+	ExerciseType     string
+	DayID            uuid.UUID
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) (Exercise, error) {
@@ -34,8 +38,11 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 		arg.ID,
 		arg.Name,
 		arg.Muscle,
+		arg.Sets,
 		arg.Repetitions,
+		arg.ExerciseDuration,
 		arg.Instructions,
+		arg.ExerciseType,
 		arg.DayID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -45,8 +52,11 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 		&i.ID,
 		&i.Name,
 		&i.Muscle,
+		&i.Sets,
 		&i.Repetitions,
+		&i.ExerciseDuration,
 		&i.Instructions,
+		&i.ExerciseType,
 		&i.DayID,
 		&i.CreatedAt,
 		&i.UpdatedAt,

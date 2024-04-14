@@ -80,7 +80,7 @@ func getWorkoutDays(results map[string]string) ([]Day, error) {
 		return []Day{}, errors.New("day result not found")
 	}
 
-	minutes, err := strconv.Atoi(results[hoursKey])
+	minutes, err := strconv.Atoi(results[minutesKey])
 	if err != nil {
 		return []Day{}, err
 	}

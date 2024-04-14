@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"sync"
 
 	"github.com/harljos/gymplanr/internal/database"
@@ -12,7 +13,7 @@ const (
 	difficultyKey   = "difficulty"
 	exerciseTypeKey = "exerciseType"
 	daysKey         = "days"
-	hoursKey        = "hours"
+	minutesKey      = "minutes"
 	cardioKey       = "cardio"
 )
 
@@ -63,13 +64,13 @@ func generateCmd(cfg *config, user database.User) error {
 	results[daysKey] = result
 
 	if results[exerciseTypeKey] == "both" {
-		hoursPrompt := []string{"30", "45", "60", "75"}
+		minutesPrompt := []string{"30", "45", "60", "75"}
 
-		result, err = SelectPrompt("How many minutes do you want each workout to be (cardio not included)?", hoursPrompt)
+		result, err = SelectPrompt("How many minutes do you want each workout to be (cardio not included)?", minutesPrompt)
 		if err != nil {
 			return err
 		}
-		results[hoursKey] = result
+		results[minutesKey] = result
 
 		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
 
@@ -85,7 +86,7 @@ func generateCmd(cfg *config, user database.User) error {
 		if err != nil {
 			return err
 		}
-		results[hoursKey] = result
+		results[minutesKey] = result
 	} else {
 		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
 
@@ -129,10 +130,10 @@ func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, 
 	if results[exerciseTypeKey] == "strength" {
 		generateStrengthExercises(cfg, user, day, results)
 	} else if results[exerciseTypeKey] == "cardio" {
-		generateCardioExercise(cfg, user, day)
+		generateCardioExercise(cfg, user, day, results)
 	} else {
 		generateStrengthExercises(cfg, user, day, results)
-		generateCardioExercise(cfg, user, day)
+		generateCardioExercise(cfg, user, day, results)
 	}
 }
 
@@ -150,7 +151,7 @@ func generateStrengthExercises(cfg *config, user database.User, day Day, results
 			continue
 		}
 
-		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, 10, databaseDay)
+		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", 3, 10, 0, databaseDay)
 		if err != nil {
 			log.Printf("couldn't create exercise: %v\n", err)
 			continue
@@ -158,22 +159,28 @@ func generateStrengthExercises(cfg *config, user database.User, day Day, results
 	}
 }
 
-func generateCardioExercise(cfg *config, user database.User, day Day) {
+func generateCardioExercise(cfg *config, user database.User, day Day, results map[string]string) {
 	exercise, err := cfg.exerciseClient.GetCardioExercise()
-		if err != nil {
-			log.Printf("couldn't fetch exercise: %v\n", err)
-			return
-		}
+	if err != nil {
+		log.Printf("couldn't fetch exercise: %v\n", err)
+		return
+	}
 
-		databaseDay, err := cfg.getDayByUser(user, day.dayName)
-		if err != nil {
-			log.Printf("couldn't get day from database: %v\n", err)
-			return
-		}
+	databaseDay, err := cfg.getDayByUser(user, day.dayName)
+	if err != nil {
+		log.Printf("couldn't get day from database: %v\n", err)
+		return
+	}
 
-		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, 0, databaseDay)
-		if err != nil {
-			log.Printf("couldn't create exercise: %v\n", err)
-			return
-		}
+	minutes, err := strconv.Atoi(results[minutesKey])
+	if err != nil {
+		log.Printf("couldn'tcovert to int: %v\n", err)
+		return
+	}
+
+	_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "cardio", 0, 0, minutes, databaseDay)
+	if err != nil {
+		log.Printf("couldn't create exercise: %v\n", err)
+		return
+	}
 }
