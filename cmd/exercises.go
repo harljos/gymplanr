@@ -47,3 +47,12 @@ func (cfg *config) createExercise(name, muscle, instructions, exerciseType strin
 
 	return exercise, nil
 }
+
+func (cfg *config) getExercisesByDay(day database.Day) ([]database.Exercise, error) {
+	exercises, err := cfg.DB.GetExercisesByDay(context.Background(), day.ID)
+	if err != nil {
+		return []database.Exercise{}, err
+	}
+
+	return exercises, nil
+}

@@ -63,3 +63,43 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 	)
 	return i, err
 }
+
+const getExercisesByDay = `-- name: GetExercisesByDay :many
+SELECT id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, day_id, created_at, updated_at FROM exercises
+WHERE exercises.day_id = $1
+`
+
+func (q *Queries) GetExercisesByDay(ctx context.Context, dayID uuid.UUID) ([]Exercise, error) {
+	rows, err := q.db.QueryContext(ctx, getExercisesByDay, dayID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Exercise
+	for rows.Next() {
+		var i Exercise
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Muscle,
+			&i.Sets,
+			&i.Repetitions,
+			&i.ExerciseDuration,
+			&i.Instructions,
+			&i.ExerciseType,
+			&i.DayID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

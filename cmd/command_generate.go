@@ -109,7 +109,7 @@ func generateCmd(cfg *config, user database.User) error {
 
 	go generateWorkout(cfg, user, workoutDays, results)
 
-	fmt.Println("Your workout plan has been generated")
+	fmt.Println("Your workout plan has been generated use 'view' command to see it")
 
 	return nil
 }
