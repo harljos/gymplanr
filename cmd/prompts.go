@@ -48,18 +48,18 @@ func passwordPrompt() string {
 	return password
 }
 
-func SelectPrompt(label string, items []string) (string, error) {
+func SelectPrompt(label string, items []string) (int, string, error) {
 	prompt := promptui.Select{
 		Label: label,
 		Items: items,
 	}
 
-	_, result, err := prompt.Run()
+	index, result, err := prompt.Run()
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
 
-	return result, err
+	return index, result, err
 }
 
 func YesNoPrompt(label string, def bool) bool {

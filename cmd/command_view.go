@@ -18,7 +18,7 @@ func viewCmd(cfg *config, user database.User) error {
 	}
 	days = append(days, "quit")
 
-	result, err := SelectPrompt("Select a day you would like to view", days)
+	index, result, err := SelectPrompt("Select a day you would like to view", days)
 	if err != nil {
 		return err
 	}
@@ -26,12 +26,7 @@ func viewCmd(cfg *config, user database.User) error {
 		return nil
 	}
 
-	day, err := cfg.getDayByUser(user, result)
-	if err != nil {
-		return err
-	}
-
-	databaseExercises, err := cfg.getExercisesByDay(day)
+	databaseExercises, err := cfg.getExercisesByDay(databaseDays[index])
 	if err != nil {
 		return err
 	}
@@ -44,15 +39,22 @@ func viewCmd(cfg *config, user database.User) error {
 			exercises = append(exercises, fmt.Sprintf("%s %v minutes", exercise.Name, exercise.ExerciseDuration.Int32))
 		}
 	}
-	exercises = append(exercises, "quit")
+	exercises = append(exercises, "back", "quit")
 
-	result, err = SelectPrompt("Select an exercise for further details", exercises)
+	index, result, err = SelectPrompt("Select an exercise for further details", exercises)
 	if err != nil {
 		return err
 	}
 	if result == "quit" {
 		return nil
 	}
+	if result == "back" {
+		return viewCmd(cfg, user)
+	}
+
+	exercise := databaseExercises[index]
+
+	fmt.Printf("sets: %v\nreps: %v\ninstructions: %s\n", exercise.Sets.Int32, exercise.Repetitions.Int32, exercise.Instructions)
 
 	return nil
 }

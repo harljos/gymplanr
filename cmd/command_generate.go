@@ -39,7 +39,7 @@ func generateCmd(cfg *config, user database.User) error {
 
 	exerciseTypePrompt := []string{"strength", "cardio", "both"}
 
-	result, err := SelectPrompt("what would you like your exercise plan to be based around?", exerciseTypePrompt)
+	_, result, err := SelectPrompt("what would you like your exercise plan to be based around?", exerciseTypePrompt)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func generateCmd(cfg *config, user database.User) error {
 	if results[exerciseTypeKey] == "strength" || results[exerciseTypeKey] == "both" {
 		difficultyPrompt := []string{"beginner", "intermediate", "expert"}
 
-		result, err = SelectPrompt("What would you like the difficulty of the strength exercises to be?", difficultyPrompt)
+		_, result, err = SelectPrompt("What would you like the difficulty of the strength exercises to be?", difficultyPrompt)
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,7 @@ func generateCmd(cfg *config, user database.User) error {
 
 	daysPrompt := []string{"3", "4", "5", "6"}
 
-	result, err = SelectPrompt("How many days a week do you want to work out?", daysPrompt)
+	_, result, err = SelectPrompt("How many days a week do you want to work out?", daysPrompt)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func generateCmd(cfg *config, user database.User) error {
 	if results[exerciseTypeKey] == "both" {
 		minutesPrompt := []string{"30", "45", "60", "75"}
 
-		result, err = SelectPrompt("How many minutes do you want each workout to be (cardio not included)?", minutesPrompt)
+		_, result, err = SelectPrompt("How many minutes do you want each workout to be (cardio not included)?", minutesPrompt)
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func generateCmd(cfg *config, user database.User) error {
 
 		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
 
-		result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
+		_, result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
 		if err != nil {
 			return err
 		}
@@ -82,7 +82,7 @@ func generateCmd(cfg *config, user database.User) error {
 	} else if results[exerciseTypeKey] == "strength" {
 		hoursPrompt := []string{"30", "45", "60", "75"}
 
-		result, err = SelectPrompt("How many minutes do you want each workout to be?", hoursPrompt)
+		_, result, err = SelectPrompt("How many minutes do you want each workout to be?", hoursPrompt)
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func generateCmd(cfg *config, user database.User) error {
 	} else {
 		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
 
-		result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
+		_, result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
 		if err != nil {
 			return err
 		}
