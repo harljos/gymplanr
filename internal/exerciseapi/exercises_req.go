@@ -62,6 +62,10 @@ func (c *Client) GetExercise(muscle, difficulty, exerciseType string) (Exercise,
 		return Exercise{}, err
 	}
 
+	if len(exercises) == 0 {
+		return c.GetExercise(muscle, "intermediate", exerciseType)
+	}
+
 	c.cache.Add(url, data)
 
 	exerciseChosen = checkExerciseOutOfBounds(exercises, exerciseChosen)
@@ -127,9 +131,9 @@ func (c *Client) GetCardioExercise() (Exercise, error) {
 }
 
 func checkExerciseOutOfBounds(exercises Exercises, num int) int {
-	if len(exercises) >= num {
+	if len(exercises) > num {
 		return num
 	}
 
-	return rand.Intn(9 - 0) + 0
+	return checkExerciseOutOfBounds(exercises, rand.Intn(9 - 0) + 0)
 }
