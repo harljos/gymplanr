@@ -174,7 +174,7 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 		return
 	}
 
-	minutes, err := strconv.Atoi(results[minutesKey])
+	minutes, err := strconv.Atoi(results[cardioKey])
 	if err != nil {
 		log.Printf("couldn't covert to int: %v\n", err)
 		return

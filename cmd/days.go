@@ -81,6 +81,10 @@ func getWorkoutDays(results map[string]string) ([]Day, error) {
 		return []Day{}, errors.New("day result not found")
 	}
 
+	if results[minutesKey] == "" {
+		results[minutesKey] = "0"
+	}
+
 	minutes, err := strconv.ParseFloat(results[minutesKey], 64)
 	if err != nil {
 		return []Day{}, err

@@ -17,6 +17,10 @@ func viewCmd(cfg *config, user database.User) error {
 	if err != nil {
 		return err
 	}
+	if databaseDays == nil {
+		fmt.Println("Workout plan has not been found use 'generate' command to get one")
+		return nil
+	}
 
 	days := []string{}
 	for _, day := range databaseDays {
@@ -65,7 +69,7 @@ func viewCmd(cfg *config, user database.User) error {
 	if exercise.ExerciseType == "strength" {
 		updatePrompt := []string{"instructions", "change sets", "change reps", "quit"}
 
-		_, result, err = SelectPrompt("What would you like to update?", updatePrompt)
+		_, result, err = SelectPrompt("Select one", updatePrompt)
 		if err != nil {
 			return err
 		}
@@ -114,6 +118,45 @@ func viewCmd(cfg *config, user database.User) error {
 
 			err = cfg.DB.UpdateReps(context.Background(), database.UpdateRepsParams{
 				Repetitions: repsNum,
+				UpdatedAt:   time.Now().UTC(),
+				ID:          exercise.ID,
+			})
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		updatePrompt := []string{"instructions", "change cardio time", "quit"}
+
+		_, result, err = SelectPrompt("Select one", updatePrompt)
+		if err != nil {
+			return err
+		}
+		time.Sleep(time.Millisecond)
+		if result == "quit" {
+			return nil
+		}
+		if result == "instructions" {
+			if exercise.Instructions == "" {
+				fmt.Println("No instructions found")
+				return nil
+			}
+			fmt.Println(exercise.Instructions)
+			return nil
+		}
+		if result == "change cardio time" {
+			minutes, err := enterInt("Minutes:")
+			if err != nil {
+				return err
+			}
+
+			duration := sql.NullInt32{
+				Int32: int32(minutes),
+				Valid: true,
+			}
+
+			err = cfg.DB.UpdateDuration(context.Background(), database.UpdateDurationParams{
+				ExerciseDuration: duration,
 				UpdatedAt: time.Now().UTC(),
 				ID: exercise.ID,
 			})
@@ -121,8 +164,6 @@ func viewCmd(cfg *config, user database.User) error {
 				return err
 			}
 		}
-	} else {
-		fmt.Printf("minutes: %v\ninstructions: %s\n", exercise.ExerciseDuration.Int32, exercise.Instructions)
 	}
 
 	return nil
