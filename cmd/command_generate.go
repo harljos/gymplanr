@@ -151,7 +151,9 @@ func generateStrengthExercises(cfg *config, user database.User, day Day, results
 			continue
 		}
 
-		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", 3, 10, 0, databaseDay)
+		sets, reps := getSetsAndReps(results)
+
+		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", sets, reps, 0, databaseDay)
 		if err != nil {
 			log.Printf("couldn't create exercise: %v\n", err)
 			continue
@@ -174,7 +176,7 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 
 	minutes, err := strconv.Atoi(results[minutesKey])
 	if err != nil {
-		log.Printf("couldn'tcovert to int: %v\n", err)
+		log.Printf("couldn't covert to int: %v\n", err)
 		return
 	}
 
@@ -183,4 +185,18 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 		log.Printf("couldn't create exercise: %v\n", err)
 		return
 	}
+}
+
+func getSetsAndReps(results map[string]string) (int, int) {
+	if results[difficultyKey] == "beginner" {
+		return 3, 6
+	}
+	if results[difficultyKey] == "intermediate" {
+		return 3, 12
+	}
+	if results[difficultyKey] == "expert" {
+		return 4, 12
+	}
+
+	return 0, 0
 }

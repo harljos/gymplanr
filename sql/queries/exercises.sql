@@ -6,3 +6,8 @@ RETURNING *;
 -- name: GetExercisesByDay :many
 SELECT * FROM exercises
 WHERE exercises.day_id = $1;
+
+-- name: UpdateSets :exec
+UPDATE exercises
+SET sets = $1, updated_at = $2
+WHERE id = $3;
