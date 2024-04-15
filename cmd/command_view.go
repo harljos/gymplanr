@@ -28,6 +28,7 @@ func viewCmd(cfg *config, user database.User) error {
 	if err != nil {
 		return err
 	}
+	time.Sleep(time.Millisecond)
 	if result == "quit" {
 		return nil
 	}
@@ -51,6 +52,7 @@ func viewCmd(cfg *config, user database.User) error {
 	if err != nil {
 		return err
 	}
+	time.Sleep(time.Millisecond)
 	if result == "quit" {
 		return nil
 	}
@@ -67,20 +69,26 @@ func viewCmd(cfg *config, user database.User) error {
 		if err != nil {
 			return err
 		}
+		time.Sleep(time.Millisecond)
 		if result == "quit" {
 			return nil
 		}
 		if result == "instructions" {
+			if exercise.Instructions == "" {
+				fmt.Println("No instructions found")
+				return nil
+			}
 			fmt.Println(exercise.Instructions)
+			return nil
 		}
 		if result == "change sets" {
-			set, err := enterInt()
+			sets, err := enterInt("Sets:")
 			if err != nil {
 				return err
 			}
 
 			setsNum := sql.NullInt32{
-				Int32: int32(set),
+				Int32: int32(sets),
 				Valid: true,
 			}
 
@@ -93,6 +101,26 @@ func viewCmd(cfg *config, user database.User) error {
 				return err
 			}
 		}
+		if result == "change reps" {
+			reps, err := enterInt("Reps:")
+			if err != nil {
+				return err
+			}
+
+			repsNum := sql.NullInt32{
+				Int32: int32(reps),
+				Valid: true,
+			}
+
+			err = cfg.DB.UpdateReps(context.Background(), database.UpdateRepsParams{
+				Repetitions: repsNum,
+				UpdatedAt: time.Now().UTC(),
+				ID: exercise.ID,
+			})
+			if err != nil {
+				return err
+			}
+		}
 	} else {
 		fmt.Printf("minutes: %v\ninstructions: %s\n", exercise.ExerciseDuration.Int32, exercise.Instructions)
 	}
@@ -100,22 +128,22 @@ func viewCmd(cfg *config, user database.User) error {
 	return nil
 }
 
-func enterInt() (int, error) {
-	sets := StringPrompt("Sets:")
-	for sets == "" {
+func enterInt(s string) (int, error) {
+	stringNum := StringPrompt(s)
+	for stringNum == "" {
 		fmt.Println("Please enter a numberic value")
-		sets = StringPrompt("Sets:")
+		stringNum = StringPrompt(s)
 	}
 
-	set, err := strconv.Atoi(sets)
+	num, err := strconv.Atoi(stringNum)
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid syntax") {
 			fmt.Println("Please enter a numeric value")
-			return enterInt()
+			return enterInt(s)
 		}
 		log.Printf("couldn't covert to int: %v\n", err)
 		return 0, nil
 	}
 
-	return set, nil
+	return num, nil
 }

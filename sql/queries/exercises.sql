@@ -11,3 +11,8 @@ WHERE exercises.day_id = $1;
 UPDATE exercises
 SET sets = $1, updated_at = $2
 WHERE id = $3;
+
+-- name: UpdateReps :exec
+UPDATE exercises
+SET repetitions = $1, updated_at = $2
+WHERE id = $3;

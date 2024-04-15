@@ -104,6 +104,23 @@ func (q *Queries) GetExercisesByDay(ctx context.Context, dayID uuid.UUID) ([]Exe
 	return items, nil
 }
 
+const updateReps = `-- name: UpdateReps :exec
+UPDATE exercises
+SET repetitions = $1, updated_at = $2
+WHERE id = $3
+`
+
+type UpdateRepsParams struct {
+	Repetitions sql.NullInt32
+	UpdatedAt   time.Time
+	ID          uuid.UUID
+}
+
+func (q *Queries) UpdateReps(ctx context.Context, arg UpdateRepsParams) error {
+	_, err := q.db.ExecContext(ctx, updateReps, arg.Repetitions, arg.UpdatedAt, arg.ID)
+	return err
+}
+
 const updateSets = `-- name: UpdateSets :exec
 UPDATE exercises
 SET sets = $1, updated_at = $2
