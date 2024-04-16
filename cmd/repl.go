@@ -44,7 +44,7 @@ func startRepl(cfg *config, user database.User) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print("gymplanr >")
+		fmt.Print("gymplanr> ")
 
 		scanner.Scan()
 		text := scanner.Text()
