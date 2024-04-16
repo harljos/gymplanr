@@ -37,7 +37,13 @@ func viewCmd(cfg *config, user database.User) error {
 		return nil
 	}
 
-	databaseExercises, err := cfg.getExercisesByDay(databaseDays[index])
+	viewExercises(cfg, databaseDays[index], user)
+
+	return nil
+}
+
+func viewExercises(cfg *config, day database.Day, user database.User) error {
+	databaseExercises, err := cfg.getExercisesByDay(day)
 	if err != nil {
 		return err
 	}
@@ -52,7 +58,7 @@ func viewCmd(cfg *config, user database.User) error {
 	}
 	exercises = append(exercises, "back", "quit")
 
-	index, result, err = SelectPrompt("Select an exercise for further details", exercises)
+	index, result, err := SelectPrompt("Select an exercise for further details", exercises)
 	if err != nil {
 		return err
 	}
@@ -67,25 +73,27 @@ func viewCmd(cfg *config, user database.User) error {
 	exercise := databaseExercises[index]
 
 	if exercise.ExerciseType == "strength" {
-		updatePrompt := []string{"instructions", "change sets", "change reps", "quit"}
+		updatePrompt := []string{"instructions", "change sets", "change reps", "back", "quit"}
 
 		_, result, err = SelectPrompt("Select one", updatePrompt)
 		if err != nil {
 			return err
 		}
+
 		time.Sleep(time.Millisecond)
-		if result == "quit" {
+		switch result {
+		case "quit":
 			return nil
-		}
-		if result == "instructions" {
+		case "back":
+			return viewExercises(cfg, day, user)
+		case "instructions":
 			if exercise.Instructions == "" {
 				fmt.Println("No instructions found")
 				return nil
 			}
 			fmt.Println(exercise.Instructions)
 			return nil
-		}
-		if result == "change sets" {
+		case "change sets":
 			sets, err := enterInt("Sets:")
 			if err != nil {
 				return err
@@ -104,8 +112,10 @@ func viewCmd(cfg *config, user database.User) error {
 			if err != nil {
 				return err
 			}
-		}
-		if result == "change reps" {
+
+			fmt.Println("exercise sets updated")
+			return viewExercises(cfg, day, user)
+		case "change reps":
 			reps, err := enterInt("Reps:")
 			if err != nil {
 				return err
@@ -124,27 +134,32 @@ func viewCmd(cfg *config, user database.User) error {
 			if err != nil {
 				return err
 			}
+
+			fmt.Println("exercise reps updated")
+			return viewExercises(cfg, day, user)
 		}
 	} else {
-		updatePrompt := []string{"instructions", "change cardio time", "quit"}
+		updatePrompt := []string{"instructions", "change cardio time", "back", "quit"}
 
 		_, result, err = SelectPrompt("Select one", updatePrompt)
 		if err != nil {
 			return err
 		}
+		
 		time.Sleep(time.Millisecond)
-		if result == "quit" {
+		switch result {
+		case "quit":
 			return nil
-		}
-		if result == "instructions" {
+		case "back":
+			return viewExercises(cfg, day, user)
+		case "instructions":
 			if exercise.Instructions == "" {
 				fmt.Println("No instructions found")
 				return nil
 			}
 			fmt.Println(exercise.Instructions)
 			return nil
-		}
-		if result == "change cardio time" {
+		case "change cardio time":
 			minutes, err := enterInt("Minutes:")
 			if err != nil {
 				return err
@@ -157,12 +172,15 @@ func viewCmd(cfg *config, user database.User) error {
 
 			err = cfg.DB.UpdateDuration(context.Background(), database.UpdateDurationParams{
 				ExerciseDuration: duration,
-				UpdatedAt: time.Now().UTC(),
-				ID: exercise.ID,
+				UpdatedAt:        time.Now().UTC(),
+				ID:               exercise.ID,
 			})
 			if err != nil {
 				return err
 			}
+
+			fmt.Println("exercise time updated")
+			return viewExercises(cfg, day, user)
 		}
 	}
 
