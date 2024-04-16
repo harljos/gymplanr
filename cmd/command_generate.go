@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/harljos/gymplanr/internal/database"
 )
@@ -63,34 +65,28 @@ func generateCmd(cfg *config, user database.User) error {
 	}
 	results[daysKey] = result
 
-	if results[exerciseTypeKey] == "both" {
-		minutesPrompt := []string{"30", "45", "60", "75"}
-
-		_, result, err = SelectPrompt("How many minutes do you want each workout to be (cardio not included)?", minutesPrompt)
+	time.Sleep(time.Millisecond)
+	switch results[exerciseTypeKey] {
+	case "both":
+		result, err := enterIntString("How many minutes do you want each workout to be (cardio not included)?")
 		if err != nil {
 			return err
 		}
 		results[minutesKey] = result
 
-		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
-
-		_, result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
+		result, err = enterIntString("How many minutes of cardio do you want to do?")
 		if err != nil {
 			return err
 		}
 		results[cardioKey] = result
-	} else if results[exerciseTypeKey] == "strength" {
-		hoursPrompt := []string{"30", "45", "60", "75"}
-
-		_, result, err = SelectPrompt("How many minutes do you want each workout to be?", hoursPrompt)
+	case "strength":
+		result, err = enterIntString("How many minutes do you want each workout to be?")
 		if err != nil {
 			return err
 		}
 		results[minutesKey] = result
-	} else {
-		hoursCardioPrompt := []string{"15", "30", "45", "60", "75", "80"}
-
-		_, result, err = SelectPrompt("How many minutes of cardio do you want to do?", hoursCardioPrompt)
+	default:
+		result, err = enterIntString("How many minutes of cardio do you want to do?")
 		if err != nil {
 			return err
 		}
@@ -127,11 +123,12 @@ func generateWorkout(cfg *config, user database.User, days []Day, results map[st
 func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, results map[string]string) {
 	defer wg.Done()
 
-	if results[exerciseTypeKey] == "strength" {
+	switch results[exerciseTypeKey] {
+	case "strength":
 		generateStrengthExercises(cfg, user, day, results)
-	} else if results[exerciseTypeKey] == "cardio" {
+	case "cardio":
 		generateCardioExercise(cfg, user, day, results)
-	} else {
+	default:
 		generateStrengthExercises(cfg, user, day, results)
 		generateCardioExercise(cfg, user, day, results)
 	}
@@ -188,15 +185,34 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 }
 
 func getSetsAndReps(results map[string]string) (int, int) {
-	if results[difficultyKey] == "beginner" {
+	switch results[difficultyKey] {
+	case "beginner":
 		return 3, 6
-	}
-	if results[difficultyKey] == "intermediate" {
+	case "intermediate":
 		return 3, 12
-	}
-	if results[difficultyKey] == "expert" {
+	case "expert":
 		return 4, 12
 	}
 
 	return 0, 0
+}
+
+func enterIntString(s string) (string, error) {
+	stringNum := StringPrompt(s)
+	for stringNum == "" {
+		fmt.Println("Please enter a numberic value")
+		stringNum = StringPrompt(s)
+	}
+
+	_, err := strconv.Atoi(stringNum)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid syntax") {
+			fmt.Println("Please enter a numeric value")
+			return enterIntString(s)
+		}
+		log.Printf("couldn't covert to int: %v\n", err)
+		return "", nil
+	}
+
+	return stringNum, nil
 }
