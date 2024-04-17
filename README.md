@@ -4,7 +4,7 @@
 
 ## Motivation
 
-### Alot of people want to get into fitness, but they aren't sure where to start. I know when I first started my fitness journey there was so much information I had to learn. How to structure a workout, what exercises hit which muscles, how many sets and reps do I do. The list goes on and on, so I built gymplanr to streamline the process to generate a full workout plan based on what your looking for with no prior knowledge about fitness.
+### A lot of people want to get into fitness, but they aren't sure where to start. I know when I first started my fitness journey there was so much information I had to learn. How to structure a workout, what exercises hit which muscles, how many sets and reps do I do. The list goes on and on, so I built gymplanr to streamline the process to generate a full workout plan based on what you're looking for with no prior knowledge about fitness.
 
 ## 🚀 Quick Start
 
