@@ -73,7 +73,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 	exercise := databaseExercises[index]
 
 	if exercise.ExerciseType == "strength" {
-		updatePrompt := []string{"instructions", "change sets", "change reps", "back", "quit"}
+		updatePrompt := []string{"instructions", "change sets", "change reps", "change exercise", "back", "quit"}
 
 		_, result, err = SelectPrompt("Select one", updatePrompt)
 		if err != nil {
@@ -136,6 +136,14 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("exercise reps updated")
+			return viewExercises(cfg, day, user)
+		case "change exercise":
+			err = cfg.updateExercise(exercise.Muscle, exercise.Difficulty, exercise.ExerciseType, exercise)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("new exercise generated")
 			return viewExercises(cfg, day, user)
 		}
 	} else {

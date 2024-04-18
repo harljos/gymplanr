@@ -71,7 +71,7 @@ func (cfg *config) updateExercise(muscle, difficulty, exerciseType string, datab
 		ExerciseType: exercise.Type,
 		Difficulty: exercise.Difficulty,
 		UpdatedAt: time.Now().UTC(),
-		ID: databaseExercise.DayID,
+		ID: databaseExercise.ID,
 	})
 	if err != nil {
 		return err
