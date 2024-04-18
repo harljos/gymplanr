@@ -125,6 +125,35 @@ func (q *Queries) UpdateDuration(ctx context.Context, arg UpdateDurationParams) 
 	return err
 }
 
+const updateExercise = `-- name: UpdateExercise :exec
+UPDATE exercises
+SET name = $1, muscle = $2, instructions = $3, exercise_type = $4, difficulty = $5, updated_at = $6
+WHERE id = $7
+`
+
+type UpdateExerciseParams struct {
+	Name         string
+	Muscle       string
+	Instructions string
+	ExerciseType string
+	Difficulty   string
+	UpdatedAt    time.Time
+	ID           uuid.UUID
+}
+
+func (q *Queries) UpdateExercise(ctx context.Context, arg UpdateExerciseParams) error {
+	_, err := q.db.ExecContext(ctx, updateExercise,
+		arg.Name,
+		arg.Muscle,
+		arg.Instructions,
+		arg.ExerciseType,
+		arg.Difficulty,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	return err
+}
+
 const updateReps = `-- name: UpdateReps :exec
 UPDATE exercises
 SET repetitions = $1, updated_at = $2

@@ -57,3 +57,25 @@ func (cfg *config) getExercisesByDay(day database.Day) ([]database.Exercise, err
 
 	return exercises, nil
 }
+
+func (cfg *config) updateExercise(muscle, difficulty, exerciseType string, databaseExercise database.Exercise) error {
+	exercise, err := cfg.exerciseClient.GetExercise(muscle, difficulty, exerciseType)
+	if err != nil {
+		return err
+	}
+
+	err = cfg.DB.UpdateExercise(context.Background(), database.UpdateExerciseParams{
+		Name: exercise.Name,
+		Muscle: exercise.Muscle,
+		Instructions: exercise.Instructions,
+		ExerciseType: exercise.Type,
+		Difficulty: exercise.Difficulty,
+		UpdatedAt: time.Now().UTC(),
+		ID: databaseExercise.DayID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

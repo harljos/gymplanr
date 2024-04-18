@@ -21,3 +21,8 @@ WHERE id = $3;
 UPDATE exercises
 SET exercise_duration = $1, updated_at = $2
 WHERE id = $3;
+
+-- name: UpdateExercise :exec
+UPDATE exercises
+SET name = $1, muscle = $2, instructions = $3, exercise_type = $4, difficulty = $5, updated_at = $6
+WHERE id = $7;
