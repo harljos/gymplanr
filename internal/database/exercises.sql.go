@@ -14,9 +14,9 @@ import (
 )
 
 const createExercise = `-- name: CreateExercise :one
-INSERT INTO exercises (id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, day_id, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-RETURNING id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, day_id, created_at, updated_at
+INSERT INTO exercises (id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, difficulty, day_id, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+RETURNING id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, difficulty, day_id, created_at, updated_at
 `
 
 type CreateExerciseParams struct {
@@ -28,6 +28,7 @@ type CreateExerciseParams struct {
 	ExerciseDuration sql.NullInt32
 	Instructions     string
 	ExerciseType     string
+	Difficulty       string
 	DayID            uuid.UUID
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
@@ -43,6 +44,7 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 		arg.ExerciseDuration,
 		arg.Instructions,
 		arg.ExerciseType,
+		arg.Difficulty,
 		arg.DayID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -57,6 +59,7 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 		&i.ExerciseDuration,
 		&i.Instructions,
 		&i.ExerciseType,
+		&i.Difficulty,
 		&i.DayID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -65,7 +68,7 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 }
 
 const getExercisesByDay = `-- name: GetExercisesByDay :many
-SELECT id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, day_id, created_at, updated_at FROM exercises
+SELECT id, name, muscle, sets, repetitions, exercise_duration, instructions, exercise_type, difficulty, day_id, created_at, updated_at FROM exercises
 WHERE exercises.day_id = $1
 `
 
@@ -87,6 +90,7 @@ func (q *Queries) GetExercisesByDay(ctx context.Context, dayID uuid.UUID) ([]Exe
 			&i.ExerciseDuration,
 			&i.Instructions,
 			&i.ExerciseType,
+			&i.Difficulty,
 			&i.DayID,
 			&i.CreatedAt,
 			&i.UpdatedAt,

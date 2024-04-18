@@ -9,7 +9,7 @@ import (
 	"github.com/harljos/gymplanr/internal/database"
 )
 
-func (cfg *config) createExercise(name, muscle, instructions, exerciseType string, sets, repetitions, duration int, day database.Day) (database.Exercise, error) {
+func (cfg *config) createExercise(name, muscle, instructions, exerciseType, difficulty string, sets, repetitions, duration int, day database.Day) (database.Exercise, error) {
 	reps := sql.NullInt32{}
 	if repetitions != 0 {
 		reps.Int32 = int32(repetitions)
@@ -33,6 +33,7 @@ func (cfg *config) createExercise(name, muscle, instructions, exerciseType strin
 		Name:             name,
 		Muscle:           muscle,
 		ExerciseType:     exerciseType,
+		Difficulty:       difficulty,
 		Sets:             setsNum,
 		Repetitions:      reps,
 		ExerciseDuration: durationNum,

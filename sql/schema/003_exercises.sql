@@ -8,6 +8,7 @@ CREATE TABLE exercises (
     exercise_duration INTEGER,
     instructions TEXT NOT NULL,
     exercise_type TEXT NOT NULL,
+    difficulty TEXT NOT NULL,
     day_id UUID NOT NULL REFERENCES days(id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL

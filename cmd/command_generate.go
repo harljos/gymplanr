@@ -150,7 +150,7 @@ func generateStrengthExercises(cfg *config, user database.User, day Day, results
 
 		sets, reps := getSetsAndReps(results)
 
-		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", sets, reps, 0, databaseDay)
+		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", exercise.Difficulty ,sets, reps, 0, databaseDay)
 		if err != nil {
 			log.Printf("couldn't create exercise: %v\n", err)
 			continue
@@ -177,7 +177,7 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 		return
 	}
 
-	_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "cardio", 0, 0, minutes, databaseDay)
+	_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "cardio",exercise.Difficulty ,0, 0, minutes, databaseDay)
 	if err != nil {
 		log.Printf("couldn't create exercise: %v\n", err)
 		return

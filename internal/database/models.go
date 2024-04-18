@@ -28,6 +28,7 @@ type Exercise struct {
 	ExerciseDuration sql.NullInt32
 	Instructions     string
 	ExerciseType     string
+	Difficulty       string
 	DayID            uuid.UUID
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
