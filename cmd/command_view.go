@@ -73,7 +73,16 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 	exercise := databaseExercises[index]
 
 	if exercise.ExerciseType == "strength" {
-		updatePrompt := []string{"instructions", "change sets", "change reps", "change exercise", "back", "quit"}
+		updatePrompt := []string{"instructions", "change sets", "change reps"}
+		switch exercise.Difficulty {
+		case "beginner":
+			updatePrompt = append(updatePrompt, "harder exercise")
+		case "intermediate":
+			updatePrompt = append(updatePrompt, "easier exercise", "harder exercise")
+		default:
+			updatePrompt = append(updatePrompt, "easier exercise")
+		}
+		updatePrompt = append(updatePrompt, "change exercise", "back", "quit")
 
 		_, result, err = SelectPrompt("Select one", updatePrompt)
 		if err != nil {
@@ -144,6 +153,14 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("new exercise generated")
+			return viewExercises(cfg, day, user)
+		case "easier exercise":
+			err = cfg.updateExercise(exercise.Muscle, easierExercise(exercise.Difficulty), exercise.ExerciseType, exercise)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("easier exercise generated")
 			return viewExercises(cfg, day, user)
 		}
 	} else {
@@ -221,4 +238,11 @@ func enterInt(s string) (int, error) {
 	}
 
 	return num, nil
+}
+
+func easierExercise(difficulty string) string {
+	if difficulty == "intermediate" {
+		return "beginner"
+	}
+	return "intermediate"
 }
