@@ -162,6 +162,14 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 
 			fmt.Println("easier exercise generated")
 			return viewExercises(cfg, day, user)
+		case "harder exercise":
+			err = cfg.updateExercise(exercise.Muscle, harderExercise(exercise.Difficulty), exercise.ExerciseType, exercise)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("harder exercise generated")
+			return viewExercises(cfg, day, user)
 		}
 	} else {
 		updatePrompt := []string{"instructions", "change cardio time", "change exercise", "back", "quit"}
@@ -245,4 +253,11 @@ func easierExercise(difficulty string) string {
 		return "beginner"
 	}
 	return "intermediate"
+}
+
+func harderExercise(difficulty string) string {
+	if difficulty == "beinner" {
+		return "intermediate"
+	}
+	return "expert"
 }
