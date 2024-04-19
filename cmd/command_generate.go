@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/charmbracelet/huh"
 	"github.com/harljos/gymplanr/internal/database"
 )
 
@@ -19,6 +20,10 @@ const (
 	cardioKey       = "cardio"
 )
 
+var (
+	confirm bool
+)
+
 func generateCmd(cfg *config, user database.User) error {
 	days, err := cfg.getDaysByUser(user)
 	if err != nil {
@@ -26,8 +31,17 @@ func generateCmd(cfg *config, user database.User) error {
 	}
 
 	if days != nil {
-		ok := YesNoPrompt("Continuing will delete your current workout routine. Do you wish to continue", true)
-		if ok {
+		err := huh.NewConfirm().
+			Title("Continuing will delete your current workout routine. Do you wish to continue").
+			Affirmative("Yes").
+			Negative("No").
+			Value(&confirm).
+			Run()
+		if err != nil {
+			return err
+		}
+
+		if confirm {
 			err = cfg.deleteDays(user)
 			if err != nil {
 				return err
@@ -150,7 +164,7 @@ func generateStrengthExercises(cfg *config, user database.User, day Day, results
 
 		sets, reps := getSetsAndReps(results)
 
-		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", exercise.Difficulty ,sets, reps, 0, databaseDay)
+		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", exercise.Difficulty, sets, reps, 0, databaseDay)
 		if err != nil {
 			log.Printf("couldn't create exercise: %v\n", err)
 			continue
@@ -177,7 +191,7 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 		return
 	}
 
-	_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "cardio",exercise.Difficulty ,0, 0, minutes, databaseDay)
+	_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "cardio", exercise.Difficulty, 0, 0, minutes, databaseDay)
 	if err != nil {
 		log.Printf("couldn't create exercise: %v\n", err)
 		return
