@@ -24,6 +24,7 @@ var (
 	confirm      bool
 	exerciseType string
 	difficulty   string
+	numOfDays    int
 )
 
 func generateCmd(cfg *config, user database.User) error {
@@ -83,13 +84,19 @@ func generateCmd(cfg *config, user database.User) error {
 		}
 	}
 
-	daysPrompt := []string{"3", "4", "5", "6"}
-
-	_, result, err := SelectPrompt("How many days a week do you want to work out?", daysPrompt)
+	err = huh.NewSelect[int]().
+		Title("How many days a week do you want to work out?").
+		Options(
+			huh.NewOption("3", 3),
+			huh.NewOption("4", 4),
+			huh.NewOption("5", 5),
+			huh.NewOption("6", 6),
+		).
+		Value(&numOfDays).
+		Run()
 	if err != nil {
 		return err
 	}
-	results[daysKey] = result
 
 	time.Sleep(time.Millisecond)
 	switch exerciseType {
@@ -106,13 +113,13 @@ func generateCmd(cfg *config, user database.User) error {
 		}
 		results[cardioKey] = result
 	case "strength":
-		result, err = enterIntString("How many minutes do you want each workout to be?")
+		result, err := enterIntString("How many minutes do you want each workout to be?")
 		if err != nil {
 			return err
 		}
 		results[minutesKey] = result
 	default:
-		result, err = enterIntString("How many minutes of cardio do you want to do?")
+		result, err := enterIntString("How many minutes of cardio do you want to do?")
 		if err != nil {
 			return err
 		}

@@ -65,7 +65,7 @@ func (cfg *config) deleteDays(user database.User) error {
 
 func (cfg *config) getDayByUser(user database.User, dayName string) (database.Day, error) {
 	day, err := cfg.DB.GetDayByNameForUser(context.Background(), database.GetDayByNameForUserParams{
-		Name: dayName,
+		Name:   dayName,
 		UserID: user.ID,
 	})
 	if err != nil {
@@ -76,11 +76,6 @@ func (cfg *config) getDayByUser(user database.User, dayName string) (database.Da
 }
 
 func getWorkoutDays(results map[string]string) ([]Day, error) {
-	days, ok := results[daysKey]
-	if !ok {
-		return []Day{}, errors.New("day result not found")
-	}
-
 	if results[minutesKey] == "" {
 		results[minutesKey] = "0"
 	}
@@ -97,7 +92,8 @@ func getWorkoutDays(results map[string]string) ([]Day, error) {
 	pullMuscles := []string{"lats", "biceps", "middle_back", "lower_back", "traps"}
 	legMuscles := []string{"hamstrings", "glutes", "quadriceps", "calves"}
 
-	if days == "3" {
+	switch numOfDays {
+	case 3:
 		return []Day{
 			{
 				dayName: "Monday",
@@ -112,8 +108,7 @@ func getWorkoutDays(results map[string]string) ([]Day, error) {
 				muscles: checkOutOfBounds(fullBodyMuscles, int(math.Round(minutes/minPerExercise))),
 			},
 		}, nil
-	}
-	if days == "4" {
+	case 4:
 		return []Day{
 			{
 				dayName: "Monday",
@@ -132,8 +127,7 @@ func getWorkoutDays(results map[string]string) ([]Day, error) {
 				muscles: checkOutOfBounds(legMuscles, int(math.Round(minutes/minPerExercise))),
 			},
 		}, nil
-	}
-	if days == "5" {
+	case 5:
 		return []Day{
 			{
 				dayName: "Monday",
@@ -156,8 +150,7 @@ func getWorkoutDays(results map[string]string) ([]Day, error) {
 				muscles: checkOutOfBounds(pullMuscles, int(math.Round(minutes/minPerExercise))),
 			},
 		}, nil
-	}
-	if days == "6" {
+	case 6:
 		return []Day{
 			{
 				dayName: "Monday",
