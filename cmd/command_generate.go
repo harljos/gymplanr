@@ -61,22 +61,16 @@ func generateCmd(cfg *config, user database.User) error {
 		return err
 	}
 
-	if exerciseType == "strength" || exerciseType == "both" {
-		err := huh.NewSelect[string]().
-			Title("What would you like the difficulty of the strength exercises to be?").
-			Options(
-				huh.NewOption("Beginner", "beginner"),
-				huh.NewOption("Intermediate", "intermediate"),
-				huh.NewOption("Expert", "expert"),
-			).
-			Value(&difficulty).
-			Run()
-		if err != nil {
-			return err
-		}
-	}
+	difficultyPrompt := huh.NewSelect[string]().
+		Title("What would you like the difficulty of the strength exercises to be?").
+		Options(
+			huh.NewOption("Beginner", "beginner"),
+			huh.NewOption("Intermediate", "intermediate"),
+			huh.NewOption("Expert", "expert"),
+		).
+		Value(&difficulty)
 
-	err = huh.NewSelect[int]().
+	daysPrompt := huh.NewSelect[int]().
 		Title("How many days a week do you want to work out?").
 		Options(
 			huh.NewOption("3", 3),
@@ -84,49 +78,52 @@ func generateCmd(cfg *config, user database.User) error {
 			huh.NewOption("5", 5),
 			huh.NewOption("6", 6),
 		).
-		Value(&numOfDays).
-		Run()
-	if err != nil {
-		return err
-	}
+		Value(&numOfDays)
+
+	cardioPrompt := huh.NewInput().
+		Title("How many minutes of cardio do you want to do?").
+		Validate(isInt).
+		Value(&cardioMinutes)
+
+	strengthPrompt := huh.NewInput().
+		Title("How many mintues do you want to do strength exercises for?").
+		Validate(isInt).
+		Value(&strengthMinutes)
 
 	switch exerciseType {
-	case "both":
-		err = huh.NewInput().
-			Title("How many minutes do you want each workout to be (cardio not included)?").
-			Validate(isInt).
-			Value(&strengthMinutes).
-			Run()
-		if err != nil {
-			return err
-		}
-
-		err = huh.NewInput().
-			Title("How many minutes of cardio do you want to do?").
-			Validate(isInt).
-			Value(&cardioMinutes).
-			Run()
-		if err != nil {
-			return err
-		}
 	case "strength":
-		err = huh.NewInput().
-			Title("How many mintues do you want each workout to be").
-			Validate(isInt).
-			Value(&strengthMinutes).
-			Run()
+		err = huh.NewForm(
+			huh.NewGroup(
+				difficultyPrompt,
+				daysPrompt,
+				strengthPrompt,
+			),
+		).Run()
+		if err != nil {
+			return err
+		}
+	case "cardio":
+		err = huh.NewForm(
+			huh.NewGroup(
+				daysPrompt,
+				cardioPrompt,
+			),
+		).Run()
 		if err != nil {
 			return err
 		}
 	default:
-		err = huh.NewInput().
-			Title("How many minutes of cardio do you want to do?").
-			Validate(isInt).
-			Value(&cardioMinutes).
-			Run()
+		err = huh.NewForm(
+			huh.NewGroup(
+				difficultyPrompt,
+				daysPrompt,
+				strengthPrompt,
+				cardioPrompt,
+			),
+		).Run()
 		if err != nil {
 			return err
-		}	
+		}
 	}
 
 	workoutDays, err := getWorkoutDays()
