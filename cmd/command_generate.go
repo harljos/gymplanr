@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -91,29 +92,41 @@ func generateCmd(cfg *config, user database.User) error {
 
 	switch exerciseType {
 	case "both":
-		result, err := enterIntString("How many minutes do you want each workout to be (cardio not included)?")
+		err = huh.NewInput().
+			Title("How many minutes do you want each workout to be (cardio not included)?").
+			Validate(isInt).
+			Value(&strengthMinutes).
+			Run()
 		if err != nil {
 			return err
 		}
-		strengthMinutes = result
 
-		result, err = enterIntString("How many minutes of cardio do you want to do?")
+		err = huh.NewInput().
+			Title("How many minutes of cardio do you want to do?").
+			Validate(isInt).
+			Value(&cardioMinutes).
+			Run()
 		if err != nil {
 			return err
 		}
-		cardioMinutes = result
 	case "strength":
-		result, err := enterIntString("How many minutes do you want each workout to be?")
+		err = huh.NewInput().
+			Title("How many mintues do you want each workout to be").
+			Validate(isInt).
+			Value(&strengthMinutes).
+			Run()
 		if err != nil {
 			return err
 		}
-		strengthMinutes = result
 	default:
-		result, err := enterIntString("How many minutes of cardio do you want to do?")
+		err = huh.NewInput().
+			Title("How many minutes of cardio do you want to do?").
+			Validate(isInt).
+			Value(&cardioMinutes).
+			Run()
 		if err != nil {
 			return err
-		}
-		cardioMinutes = result
+		}	
 	}
 
 	workoutDays, err := getWorkoutDays()
@@ -220,30 +233,14 @@ func getSetsAndReps() (int, int) {
 	return 0, 0
 }
 
-func enterIntString(s string) (string, error) {
-	var value string
-	minutesPrompt := huh.NewText().Title(s).Value(&value)
-
-	err := minutesPrompt.Run()
-	if err != nil {
-		return "", err
-	}
-	for value == "" {
-		fmt.Println("Please enter a numberic value")
-		err = minutesPrompt.Run()
-		if err != nil {
-			return "", err
-		}
-	}
-
-	_, err = strconv.Atoi(value)
+func isInt(s string) error {
+	_, err := strconv.Atoi(s)
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid syntax") {
-			fmt.Println("Please enter a numeric value")
-			return enterIntString(s)
+			return errors.New("please enter a whole number")
 		}
-		return "", err
+		return err
 	}
 
-	return value, nil
+	return nil
 }
