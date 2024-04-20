@@ -75,12 +75,12 @@ func (cfg *config) getDayByUser(user database.User, dayName string) (database.Da
 	return day, nil
 }
 
-func getWorkoutDays(results map[string]string) ([]Day, error) {
-	if results[minutesKey] == "" {
-		results[minutesKey] = "0"
+func getWorkoutDays() ([]Day, error) {
+	if strengthMinutes == "" {
+		strengthMinutes = "0"
 	}
 
-	minutes, err := strconv.ParseFloat(results[minutesKey], 64)
+	minutes, err := strconv.ParseFloat(strengthMinutes, 64)
 	if err != nil {
 		return []Day{}, err
 	}

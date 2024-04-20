@@ -6,25 +6,18 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/charmbracelet/huh"
 	"github.com/harljos/gymplanr/internal/database"
 )
 
-const (
-	difficultyKey   = "difficulty"
-	exerciseTypeKey = "exerciseType"
-	daysKey         = "days"
-	minutesKey      = "minutes"
-	cardioKey       = "cardio"
-)
-
 var (
-	confirm      bool
-	exerciseType string
-	difficulty   string
-	numOfDays    int
+	confirm         bool
+	exerciseType    string
+	difficulty      string
+	numOfDays       int
+	strengthMinutes string
+	cardioMinutes   string
 )
 
 func generateCmd(cfg *config, user database.User) error {
@@ -53,8 +46,6 @@ func generateCmd(cfg *config, user database.User) error {
 			return nil
 		}
 	}
-
-	results := make(map[string]string)
 
 	err = huh.NewSelect[string]().
 		Title("what would you like your exercise plan to be based around?").
@@ -98,35 +89,34 @@ func generateCmd(cfg *config, user database.User) error {
 		return err
 	}
 
-	time.Sleep(time.Millisecond)
 	switch exerciseType {
 	case "both":
 		result, err := enterIntString("How many minutes do you want each workout to be (cardio not included)?")
 		if err != nil {
 			return err
 		}
-		results[minutesKey] = result
+		strengthMinutes = result
 
 		result, err = enterIntString("How many minutes of cardio do you want to do?")
 		if err != nil {
 			return err
 		}
-		results[cardioKey] = result
+		cardioMinutes = result
 	case "strength":
 		result, err := enterIntString("How many minutes do you want each workout to be?")
 		if err != nil {
 			return err
 		}
-		results[minutesKey] = result
+		strengthMinutes = result
 	default:
 		result, err := enterIntString("How many minutes of cardio do you want to do?")
 		if err != nil {
 			return err
 		}
-		results[cardioKey] = result
+		cardioMinutes = result
 	}
 
-	workoutDays, err := getWorkoutDays(results)
+	workoutDays, err := getWorkoutDays()
 	if err != nil {
 		return err
 	}
@@ -136,38 +126,38 @@ func generateCmd(cfg *config, user database.User) error {
 		return err
 	}
 
-	go generateWorkout(cfg, user, workoutDays, results)
+	go generateWorkout(cfg, user, workoutDays)
 
 	fmt.Println("Your workout plan has been generated use 'view' command to see it")
 
 	return nil
 }
 
-func generateWorkout(cfg *config, user database.User, days []Day, results map[string]string) {
+func generateWorkout(cfg *config, user database.User, days []Day) {
 	wg := &sync.WaitGroup{}
 	for _, day := range days {
 		wg.Add(1)
 
-		go getExercises(cfg, wg, user, day, results)
+		go getExercises(cfg, wg, user, day)
 	}
 	wg.Wait()
 }
 
-func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, results map[string]string) {
+func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day) {
 	defer wg.Done()
 
 	switch exerciseType {
 	case "strength":
-		generateStrengthExercises(cfg, user, day, results)
+		generateStrengthExercises(cfg, user, day)
 	case "cardio":
-		generateCardioExercise(cfg, user, day, results)
+		generateCardioExercise(cfg, user, day)
 	default:
-		generateStrengthExercises(cfg, user, day, results)
-		generateCardioExercise(cfg, user, day, results)
+		generateStrengthExercises(cfg, user, day)
+		generateCardioExercise(cfg, user, day)
 	}
 }
 
-func generateStrengthExercises(cfg *config, user database.User, day Day, results map[string]string) {
+func generateStrengthExercises(cfg *config, user database.User, day Day) {
 	for _, muscle := range day.muscles {
 		exercise, err := cfg.exerciseClient.GetExercise(muscle, difficulty, "strength")
 		if err != nil {
@@ -191,7 +181,7 @@ func generateStrengthExercises(cfg *config, user database.User, day Day, results
 	}
 }
 
-func generateCardioExercise(cfg *config, user database.User, day Day, results map[string]string) {
+func generateCardioExercise(cfg *config, user database.User, day Day) {
 	exercise, err := cfg.exerciseClient.GetCardioExercise()
 	if err != nil {
 		log.Printf("couldn't fetch exercise: %v\n", err)
@@ -204,7 +194,7 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 		return
 	}
 
-	minutes, err := strconv.Atoi(results[cardioKey])
+	minutes, err := strconv.Atoi(cardioMinutes)
 	if err != nil {
 		log.Printf("couldn't covert to int: %v\n", err)
 		return
@@ -231,21 +221,29 @@ func getSetsAndReps() (int, int) {
 }
 
 func enterIntString(s string) (string, error) {
-	stringNum := StringPrompt(s)
-	for stringNum == "" {
+	var value string
+	minutesPrompt := huh.NewText().Title(s).Value(&value)
+
+	err := minutesPrompt.Run()
+	if err != nil {
+		return "", err
+	}
+	for value == "" {
 		fmt.Println("Please enter a numberic value")
-		stringNum = StringPrompt(s)
+		err = minutesPrompt.Run()
+		if err != nil {
+			return "", err
+		}
 	}
 
-	_, err := strconv.Atoi(stringNum)
+	_, err = strconv.Atoi(value)
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid syntax") {
 			fmt.Println("Please enter a numeric value")
 			return enterIntString(s)
 		}
-		log.Printf("couldn't covert to int: %v\n", err)
-		return "", nil
+		return "", err
 	}
 
-	return stringNum, nil
+	return value, nil
 }
