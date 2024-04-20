@@ -23,6 +23,7 @@ const (
 var (
 	confirm      bool
 	exerciseType string
+	difficulty   string
 )
 
 func generateCmd(cfg *config, user database.User) error {
@@ -54,31 +55,32 @@ func generateCmd(cfg *config, user database.User) error {
 
 	results := make(map[string]string)
 
-	err = huh.NewForm(
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("what would you like your exercise plan to be based around?").
-				Options(
-					huh.NewOption("Strength", "strength"),
-					huh.NewOption("Cardio", "cardio"),
-					huh.NewOption("Both", "both"),
-				).
-				Value(&exerciseType),
-		),
-	).
+	err = huh.NewSelect[string]().
+		Title("what would you like your exercise plan to be based around?").
+		Options(
+			huh.NewOption("Strength", "strength"),
+			huh.NewOption("Cardio", "cardio"),
+			huh.NewOption("Both", "both"),
+		).
+		Value(&exerciseType).
 		Run()
 	if err != nil {
 		return err
 	}
 
 	if exerciseType == "strength" || exerciseType == "both" {
-		difficultyPrompt := []string{"beginner", "intermediate", "expert"}
-
-		_, result, err := SelectPrompt("What would you like the difficulty of the strength exercises to be?", difficultyPrompt)
+		err := huh.NewSelect[string]().
+			Title("What would you like the difficulty of the strength exercises to be?").
+			Options(
+				huh.NewOption("Beginner", "beginner"),
+				huh.NewOption("Intermediate", "intermediate"),
+				huh.NewOption("Expert", "expert"),
+			).
+			Value(&difficulty).
+			Run()
 		if err != nil {
 			return err
 		}
-		results[difficultyKey] = result
 	}
 
 	daysPrompt := []string{"3", "4", "5", "6"}
@@ -160,7 +162,7 @@ func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, 
 
 func generateStrengthExercises(cfg *config, user database.User, day Day, results map[string]string) {
 	for _, muscle := range day.muscles {
-		exercise, err := cfg.exerciseClient.GetExercise(muscle, results[difficultyKey], "strength")
+		exercise, err := cfg.exerciseClient.GetExercise(muscle, difficulty, "strength")
 		if err != nil {
 			log.Printf("couldn't fetch exercise: %v\n", err)
 			continue
@@ -172,7 +174,7 @@ func generateStrengthExercises(cfg *config, user database.User, day Day, results
 			continue
 		}
 
-		sets, reps := getSetsAndReps(results)
+		sets, reps := getSetsAndReps()
 
 		_, err = cfg.createExercise(exercise.Name, exercise.Muscle, exercise.Instructions, "strength", exercise.Difficulty, sets, reps, 0, databaseDay)
 		if err != nil {
@@ -208,8 +210,8 @@ func generateCardioExercise(cfg *config, user database.User, day Day, results ma
 	}
 }
 
-func getSetsAndReps(results map[string]string) (int, int) {
-	switch results[difficultyKey] {
+func getSetsAndReps() (int, int) {
+	switch difficulty {
 	case "beginner":
 		return 3, 6
 	case "intermediate":
