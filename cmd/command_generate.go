@@ -21,7 +21,8 @@ const (
 )
 
 var (
-	confirm bool
+	confirm      bool
+	exerciseType string
 )
 
 func generateCmd(cfg *config, user database.User) error {
@@ -53,18 +54,27 @@ func generateCmd(cfg *config, user database.User) error {
 
 	results := make(map[string]string)
 
-	exerciseTypePrompt := []string{"strength", "cardio", "both"}
-
-	_, result, err := SelectPrompt("what would you like your exercise plan to be based around?", exerciseTypePrompt)
+	err = huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("what would you like your exercise plan to be based around?").
+				Options(
+					huh.NewOption("Strength", "strength"),
+					huh.NewOption("Cardio", "cardio"),
+					huh.NewOption("Both", "both"),
+				).
+				Value(&exerciseType),
+		),
+	).
+		Run()
 	if err != nil {
 		return err
 	}
-	results[exerciseTypeKey] = result
 
-	if results[exerciseTypeKey] == "strength" || results[exerciseTypeKey] == "both" {
+	if exerciseType == "strength" || exerciseType == "both" {
 		difficultyPrompt := []string{"beginner", "intermediate", "expert"}
 
-		_, result, err = SelectPrompt("What would you like the difficulty of the strength exercises to be?", difficultyPrompt)
+		_, result, err := SelectPrompt("What would you like the difficulty of the strength exercises to be?", difficultyPrompt)
 		if err != nil {
 			return err
 		}
@@ -73,14 +83,14 @@ func generateCmd(cfg *config, user database.User) error {
 
 	daysPrompt := []string{"3", "4", "5", "6"}
 
-	_, result, err = SelectPrompt("How many days a week do you want to work out?", daysPrompt)
+	_, result, err := SelectPrompt("How many days a week do you want to work out?", daysPrompt)
 	if err != nil {
 		return err
 	}
 	results[daysKey] = result
 
 	time.Sleep(time.Millisecond)
-	switch results[exerciseTypeKey] {
+	switch exerciseType {
 	case "both":
 		result, err := enterIntString("How many minutes do you want each workout to be (cardio not included)?")
 		if err != nil {
@@ -137,7 +147,7 @@ func generateWorkout(cfg *config, user database.User, days []Day, results map[st
 func getExercises(cfg *config, wg *sync.WaitGroup, user database.User, day Day, results map[string]string) {
 	defer wg.Done()
 
-	switch results[exerciseTypeKey] {
+	switch exerciseType {
 	case "strength":
 		generateStrengthExercises(cfg, user, day, results)
 	case "cardio":
