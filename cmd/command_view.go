@@ -4,9 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/huh"
@@ -17,6 +15,7 @@ var (
 	databaseDay      database.Day
 	databaseExercise database.Exercise
 	updateOption     string
+	stringInt        string
 )
 
 func viewCmd(cfg *config, user database.User) error {
@@ -83,10 +82,15 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 		return viewCmd(cfg, user)
 	}
 
+	intPrompt := huh.NewInput().
+		Title("How many mintues do you want to do strength exercises for?").
+		Validate(isInt).
+		Value(&stringInt)
+
 	if databaseExercise.ExerciseType == "strength" {
 		updateOptions := []huh.Option[string]{
-			huh.NewOption("Instructions", "instructions"), 
-			huh.NewOption("Change Sets", "change sets"), 
+			huh.NewOption("Instructions", "instructions"),
+			huh.NewOption("Change Sets", "change sets"),
 			huh.NewOption("Change Reps", "change reps"),
 		}
 
@@ -122,7 +126,12 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			fmt.Println(databaseExercise.Instructions)
 			return nil
 		case "change sets":
-			sets, err := enterInt("Sets:")
+			err = intPrompt.Run()
+			if err != nil {
+				return err
+			}
+
+			sets, err := strconv.Atoi(stringInt)
 			if err != nil {
 				return err
 			}
@@ -144,7 +153,12 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			fmt.Println("exercise sets updated")
 			return viewExercises(cfg, day, user)
 		case "change reps":
-			reps, err := enterInt("Reps:")
+			err = intPrompt.Run()
+			if err != nil {
+				return err
+			}
+
+			reps, err := strconv.Atoi(stringInt)
 			if err != nil {
 				return err
 			}
@@ -192,10 +206,10 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 		}
 	} else {
 		updateOptions := []huh.Option[string]{
-			huh.NewOption("Instructions", "instructions"), 
-			huh.NewOption("Change cardio time", "change cardio time"), 
-			huh.NewOption("Change exercise", "change exercise"), 
-			huh.NewOption("Back", "back"), 
+			huh.NewOption("Instructions", "instructions"),
+			huh.NewOption("Change cardio time", "change cardio time"),
+			huh.NewOption("Change exercise", "change exercise"),
+			huh.NewOption("Back", "back"),
 			huh.NewOption("Quit", "quit"),
 		}
 
@@ -221,7 +235,12 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			fmt.Println(databaseExercise.Instructions)
 			return nil
 		case "change cardio time":
-			minutes, err := enterInt("Minutes:")
+			err = intPrompt.Run()
+			if err != nil {
+				return err
+			}
+
+			minutes, err := strconv.Atoi(stringInt)
 			if err != nil {
 				return err
 			}
@@ -254,26 +273,6 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 	}
 
 	return nil
-}
-
-func enterInt(s string) (int, error) {
-	stringNum := StringPrompt(s)
-	for stringNum == "" {
-		fmt.Println("Please enter a numberic value")
-		stringNum = StringPrompt(s)
-	}
-
-	num, err := strconv.Atoi(stringNum)
-	if err != nil {
-		if strings.Contains(err.Error(), "invalid syntax") {
-			fmt.Println("Please enter a numeric value")
-			return enterInt(s)
-		}
-		log.Printf("couldn't covert to int: %v\n", err)
-		return 0, nil
-	}
-
-	return num, nil
 }
 
 func easierExercise(difficulty string) string {
