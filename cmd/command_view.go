@@ -33,6 +33,7 @@ func viewCmd(cfg *config, user database.User) error {
 	daysPrompt := huh.NewSelect[database.Day]().
 		Title("Select a day you would like to view").
 		Value(&databaseDay)
+
 	for _, day := range databaseDays {
 		days = append(days, huh.NewOption(day.Name, day))
 	}
@@ -61,6 +62,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 	exercisesPrompt := huh.NewSelect[database.Exercise]().
 		Title("Select an exercise for further details").
 		Value(&databaseExercise)
+
 	for _, exercise := range databaseExercises {
 		if exercise.ExerciseType == "strength" {
 			exercises = append(exercises, huh.NewOption(fmt.Sprintf("%s %v sets, %v reps", exercise.Name, exercise.Sets.Int32, exercise.Repetitions.Int32), exercise))
@@ -82,10 +84,16 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 	}
 
 	if databaseExercise.ExerciseType == "strength" {
-		updateOptions := []huh.Option[string]{huh.NewOption("Instructions", "instructions"), huh.NewOption("Change Sets", "change sets"), huh.NewOption("Change Reps", "change reps")}
+		updateOptions := []huh.Option[string]{
+			huh.NewOption("Instructions", "instructions"), 
+			huh.NewOption("Change Sets", "change sets"), 
+			huh.NewOption("Change Reps", "change reps"),
+		}
+
 		updatePrompt := huh.NewSelect[string]().
 			Title("Select one").
 			Value(&updateOption)
+
 		switch databaseExercise.Difficulty {
 		case "beginner":
 			updateOptions = append(updateOptions, huh.NewOption("Harder Exercise", "harder exercise"))
@@ -183,15 +191,24 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			return viewExercises(cfg, day, user)
 		}
 	} else {
-		updatePrompt := []string{"instructions", "change cardio time", "change exercise", "back", "quit"}
+		updateOptions := []huh.Option[string]{
+			huh.NewOption("Instructions", "instructions"), 
+			huh.NewOption("Change cardio time", "change cardio time"), 
+			huh.NewOption("Change exercise", "change exercise"), 
+			huh.NewOption("Back", "back"), 
+			huh.NewOption("Quit", "quit"),
+		}
 
-		_, result, err := SelectPrompt("Select one", updatePrompt)
+		err = huh.NewSelect[string]().
+			Title("Select one").
+			Value(&updateOption).
+			Options(updateOptions...).
+			Run()
 		if err != nil {
 			return err
 		}
 
-		time.Sleep(time.Millisecond)
-		switch result {
+		switch updateOption {
 		case "quit":
 			return nil
 		case "back":
