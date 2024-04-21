@@ -9,7 +9,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/huh"
 	"github.com/harljos/gymplanr/internal/database"
+)
+
+var (
+	databaseDay database.Day
 )
 
 func viewCmd(cfg *config, user database.User) error {
@@ -18,26 +23,29 @@ func viewCmd(cfg *config, user database.User) error {
 		return err
 	}
 	if databaseDays == nil {
-		fmt.Println("Workout plan has not been found use 'generate' command to get one")
+		fmt.Println("Workout plan has not been found use the 'generate' command to get one")
 		return nil
 	}
 
-	days := []string{}
+	days := []huh.Option[database.Day]{}
+	daysPrompt := huh.NewSelect[database.Day]().
+		Title("Select a day you would like to view").
+		Value(&databaseDay)
 	for _, day := range databaseDays {
-		days = append(days, day.Name)
+		days = append(days, huh.NewOption(day.Name, day))
 	}
-	days = append(days, "quit")
+	days = append(days, huh.NewOption("quit", database.Day{Name: "quit"}))
+	daysPrompt.Options(days...)
 
-	index, result, err := SelectPrompt("Select a day you would like to view", days)
+	err = daysPrompt.Run()
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Millisecond)
-	if result == "quit" {
+	if databaseDay.Name == "quit" {
 		return nil
 	}
 
-	viewExercises(cfg, databaseDays[index], user)
+	viewExercises(cfg, databaseDay, user)
 
 	return nil
 }
@@ -178,7 +186,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 		if err != nil {
 			return err
 		}
-		
+
 		time.Sleep(time.Millisecond)
 		switch result {
 		case "quit":
