@@ -7,21 +7,23 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, username, password, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, username, password, created_at, updated_at
+INSERT INTO users (id, username, password, hostname, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, username, password, created_at, updated_at, hostname
 `
 
 type CreateUserParams struct {
 	ID        uuid.UUID
-	Username  string
-	Password  string
+	Username  sql.NullString
+	Password  sql.NullString
+	Hostname  sql.NullString
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -31,6 +33,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.ID,
 		arg.Username,
 		arg.Password,
+		arg.Hostname,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -41,15 +44,16 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Hostname,
 	)
 	return i, err
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, password, created_at, updated_at FROM users WHERE username = $1
+SELECT id, username, password, created_at, updated_at, hostname FROM users WHERE username = $1
 `
 
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+func (q *Queries) GetUserByUsername(ctx context.Context, username sql.NullString) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
@@ -58,6 +62,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Hostname,
 	)
 	return i, err
 }

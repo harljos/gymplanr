@@ -36,8 +36,9 @@ type Exercise struct {
 
 type User struct {
 	ID        uuid.UUID
-	Username  string
-	Password  string
+	Username  sql.NullString
+	Password  sql.NullString
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Hostname  sql.NullString
 }

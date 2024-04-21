@@ -1,0 +1,11 @@
+-- +goose Up
+ALTER TABLE users
+ALTER COLUMN username DROP NOT NULL,
+ALTER COLUMN password DROP NOT NULL,
+ADD hostname VARCHAR(64);
+
+-- +goose Down
+ALTER TABLE users
+ALTER COLUMN username SET NOT NULL,
+ALTER COLUMN password SET NOT NULL,
+DROP COLUMN hostname;

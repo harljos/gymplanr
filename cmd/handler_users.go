@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"time"
 
@@ -16,10 +17,20 @@ func (cfg *config) createUserHandler(username, password string) (database.User, 
 		return database.User{}, err
 	}
 
+	sqlUsername := sql.NullString{
+		String: username,
+		Valid: true,
+	}
+
+	sqlPassword := sql.NullString{
+		String: string(hashed),
+		Valid: true,
+	}
+
 	user, err := cfg.DB.CreateUser(context.Background(), database.CreateUserParams{
 		ID:        uuid.New(),
-		Username:  username,
-		Password:  string(hashed),
+		Username:  sqlUsername,
+		Password:  sqlPassword,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	})
@@ -31,12 +42,17 @@ func (cfg *config) createUserHandler(username, password string) (database.User, 
 }
 
 func (cfg *config) loginUserHandler(username, password string) (database.User, error) {
-	user, err := cfg.DB.GetUserByUsername(context.Background(), username)
+	sqlUsername := sql.NullString{
+		String: username,
+		Valid: true,
+	}
+
+	user, err := cfg.DB.GetUserByUsername(context.Background(), sqlUsername)
 	if err != nil {
 		return database.User{}, errors.New("user not found")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(password))
 	if err != nil {
 		return database.User{}, errors.New("incorrect password")
 	}

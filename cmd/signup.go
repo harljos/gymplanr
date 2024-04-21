@@ -25,7 +25,7 @@ var signUpCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Printf("Thank you %s for signing up for gymplanr!\n", user.Username)
+		fmt.Printf("Thank you %s for signing up for gymplanr!\n", user.Username.String)
 	},
 }
 
