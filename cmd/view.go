@@ -8,10 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var generateCommand = &cobra.Command{
-	Use:   "generate",
-	Short: "Generates workout plan",
-	Long:  "Generates workout plan",
+var viewCommand = &cobra.Command{
+	Use:   "view",
+	Short: "View workout plan",
+	Long:  "View workout plan",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := connectToDB()
 		if err != nil {
@@ -30,7 +30,7 @@ var generateCommand = &cobra.Command{
 				if err != nil {
 					log.Fatal(err)
 				}
-				err = generateCmd(&cfg, user)
+				err = viewCmd(&cfg, user)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -38,7 +38,7 @@ var generateCommand = &cobra.Command{
 				log.Fatal(err)
 			}
 		} else {
-			err = generateCmd(&cfg, user)
+			err = viewCmd(&cfg, user)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -47,5 +47,5 @@ var generateCommand = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(generateCommand)
+	rootCmd.AddCommand(viewCommand)
 }

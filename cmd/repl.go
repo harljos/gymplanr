@@ -10,9 +10,9 @@ import (
 )
 
 type cliCommand struct {
-	name         string
+	name        string
 	description string
-	callback     func(*config, database.User) error
+	callback    func(*config, database.User) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -33,9 +33,9 @@ func getCommands() map[string]cliCommand {
 			callback:    viewCmd,
 		},
 		"exit": {
-			name:         "exit",
+			name:        "exit",
 			description: "Exit gymplanr",
-			callback:     exitCmd,
+			callback:    exitCmd,
 		},
 	}
 }
@@ -55,7 +55,7 @@ func startRepl(cfg *config, user database.User) {
 		}
 
 		commandName := cleaned[0]
-		
+
 		commands := getCommands()
 
 		command, ok := commands[commandName]

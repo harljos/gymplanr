@@ -7,14 +7,16 @@ github.com/aymanbagabas/go-osc52/v2
 # github.com/catppuccin/go v0.2.0
 ## explicit; go 1.19
 github.com/catppuccin/go
-# github.com/charmbracelet/bubbles v0.17.2-0.20240108170749-ec883029c8e6
-## explicit; go 1.17
+# github.com/charmbracelet/bubbles v0.18.0
+## explicit; go 1.18
 github.com/charmbracelet/bubbles/cursor
 github.com/charmbracelet/bubbles/help
 github.com/charmbracelet/bubbles/key
 github.com/charmbracelet/bubbles/paginator
 github.com/charmbracelet/bubbles/runeutil
+github.com/charmbracelet/bubbles/spinner
 github.com/charmbracelet/bubbles/textarea
+github.com/charmbracelet/bubbles/textarea/memoization
 github.com/charmbracelet/bubbles/textinput
 github.com/charmbracelet/bubbles/viewport
 # github.com/charmbracelet/bubbletea v0.25.0
@@ -24,6 +26,9 @@ github.com/charmbracelet/bubbletea
 ## explicit; go 1.18
 github.com/charmbracelet/huh
 github.com/charmbracelet/huh/accessibility
+# github.com/charmbracelet/huh/spinner v0.0.0-20240417163504-acfe24c3f5b5
+## explicit; go 1.19
+github.com/charmbracelet/huh/spinner
 # github.com/charmbracelet/lipgloss v0.9.1
 ## explicit; go 1.17
 github.com/charmbracelet/lipgloss
@@ -80,7 +85,7 @@ github.com/muesli/reflow/wrap
 # github.com/muesli/termenv v0.15.2
 ## explicit; go 1.17
 github.com/muesli/termenv
-# github.com/rivo/uniseg v0.4.4
+# github.com/rivo/uniseg v0.4.6
 ## explicit; go 1.18
 github.com/rivo/uniseg
 # github.com/spf13/cobra v1.8.0
@@ -93,8 +98,8 @@ github.com/spf13/pflag
 ## explicit; go 1.18
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
-# golang.org/x/sync v0.4.0
-## explicit; go 1.17
+# golang.org/x/sync v0.6.0
+## explicit; go 1.18
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.18.0
 ## explicit; go 1.18

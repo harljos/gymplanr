@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/huh/spinner"
 	"github.com/harljos/gymplanr/internal/database"
 )
 
@@ -136,7 +137,19 @@ func generateCmd(cfg *config, user database.User) error {
 		return err
 	}
 
-	go generateWorkout(cfg, user, workoutDays)
+	if user.Hostname.Valid {
+		err = spinner.New().
+			Title("Generating you workout plan...").
+			Action(func() {
+				generateWorkout(cfg, user, workoutDays)
+			}).
+			Run()
+		if err != nil {
+			return err
+		}
+	} else {
+		go generateWorkout(cfg, user, workoutDays)
+	}
 
 	fmt.Println("Your workout plan has been generated use 'view' command to see it")
 
@@ -231,7 +244,7 @@ func getSetsAndReps() (int, int) {
 }
 
 func isInt(s string) error {
-	_, err := strconv.Atoi(s)
+	num, err := strconv.Atoi(s)
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid syntax") {
 			return errors.New("please enter a whole number")
@@ -239,5 +252,8 @@ func isInt(s string) error {
 		return err
 	}
 
+	if num > 120 {
+		return errors.New("120 minutes is max")
+	}
 	return nil
 }
