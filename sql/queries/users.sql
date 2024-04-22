@@ -5,3 +5,6 @@ RETURNING *;
 
 -- name: GetUserByUsername :one
 SELECT * FROM users WHERE username = $1;
+
+-- name: GetUserByHostname :one
+SELECT * FROM users WHERE hostname = $1;

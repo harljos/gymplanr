@@ -49,6 +49,24 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const getUserByHostname = `-- name: GetUserByHostname :one
+SELECT id, username, password, created_at, updated_at, hostname FROM users WHERE hostname = $1
+`
+
+func (q *Queries) GetUserByHostname(ctx context.Context, hostname sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByHostname, hostname)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Hostname,
+	)
+	return i, err
+}
+
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, username, password, created_at, updated_at, hostname FROM users WHERE username = $1
 `
