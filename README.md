@@ -14,7 +14,21 @@
 go install github.com/harljos/gymplanr@latest
 ```
 
-### Run the signUp command to create an account
+### Run the generate command to generate a workout plan
+
+```bash
+gymplanr generate
+```
+
+### Run the view command to view your workout plan
+
+```bash
+gymplanr view
+```
+
+### OR
+
+### Run the signUp command to create an account (if planning to use gymplanr on multiple computers)
 
 ```bash
 gymplanr signUp
@@ -26,10 +40,16 @@ gymplanr signUp
 gymplanr login
 ```
 
-### Run the generate command
+### Run the generate command to generate a workout plan
 
 ```bash
 gymplanr> generate
+```
+
+### Run the view command to view your workout plan
+
+```bash
+gymplanr> view
 ```
 
 ## 📖 Usage
@@ -37,10 +57,12 @@ gymplanr> generate
 ### Available commands:
 
 * help - help about any command
+* generate - generates workout plan
+* view - view workout plan and edit exercises
 * login - logs in user
 * signUp - creates an account for gymplanr
 
-### Available shell commands:
+### Available session commands:
 
 * help - displays information about all commands
 * generate - generates workout plan
@@ -65,8 +87,8 @@ go build
 ### Run the project
 
 ```bash
-gymplanr signUp
-gymplanr login
+gymplanr generate
+gymplanr view
 ```
 
 ### Submit a pull request
