@@ -27,6 +27,9 @@ func viewCmd(cfg *config, user database.User) error {
 		fmt.Println("Workout plan has not been found use the 'generate' command to get one")
 		return nil
 	}
+	if len(databaseDays) == 1 {
+		return viewExercises(cfg, databaseDays[0], user, len(databaseDays))
+	}
 
 	days := []huh.Option[database.Day]{}
 	daysPrompt := huh.NewSelect[database.Day]().
@@ -46,12 +49,12 @@ func viewCmd(cfg *config, user database.User) error {
 		return nil
 	}
 
-	viewExercises(cfg, databaseDay, user)
+	viewExercises(cfg, databaseDay, user, len(databaseDays))
 
 	return nil
 }
 
-func viewExercises(cfg *config, day database.Day, user database.User) error {
+func viewExercises(cfg *config, day database.Day, user database.User, numOfDays int) error {
 	databaseExercises, err := cfg.getExercisesByDay(day)
 	if err != nil {
 		return err
@@ -69,7 +72,10 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			exercises = append(exercises, huh.NewOption(fmt.Sprintf("%s %v minutes", exercise.Name, exercise.ExerciseDuration.Int32), exercise))
 		}
 	}
-	exercises = append(exercises, huh.NewOption("Back", database.Exercise{Name: "back"}), huh.NewOption("Quit", database.Exercise{Name: "quit"}))
+	if numOfDays != 1 {
+		exercises  = append(exercises, huh.NewOption("Back", database.Exercise{Name: "back"}))
+	}
+	exercises = append(exercises, huh.NewOption("Quit", database.Exercise{Name: "quit"}))
 
 	err = exercisesPrompt.Options(exercises...).Run()
 	if err != nil {
@@ -117,7 +123,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 		case "quit":
 			return nil
 		case "back":
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		case "instructions":
 			if databaseExercise.Instructions == "" {
 				fmt.Println("No instructions found")
@@ -151,7 +157,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("exercise sets updated")
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		case "change reps":
 			err = intPrompt.Run()
 			if err != nil {
@@ -178,7 +184,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("exercise reps updated")
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		case "change exercise":
 			err = cfg.updateExercise(databaseExercise.Muscle, databaseExercise.Difficulty, databaseExercise.ExerciseType, databaseExercise)
 			if err != nil {
@@ -186,7 +192,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("new exercise generated")
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		case "easier exercise":
 			err = cfg.updateExercise(databaseExercise.Muscle, easierExercise(databaseExercise.Difficulty), databaseExercise.ExerciseType, databaseExercise)
 			if err != nil {
@@ -194,7 +200,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("easier exercise generated")
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		case "harder exercise":
 			err = cfg.updateExercise(databaseExercise.Muscle, harderExercise(databaseExercise.Difficulty), databaseExercise.ExerciseType, databaseExercise)
 			if err != nil {
@@ -202,7 +208,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("harder exercise generated")
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		}
 	} else {
 		updateOptions := []huh.Option[string]{
@@ -226,7 +232,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 		case "quit":
 			return nil
 		case "back":
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		case "instructions":
 			if databaseExercise.Instructions == "" {
 				fmt.Println("No instructions found")
@@ -260,7 +266,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("exercise time updated")
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		case "change exercise":
 			err = cfg.updateExercise(databaseExercise.Muscle, databaseExercise.Difficulty, databaseExercise.ExerciseType, databaseExercise)
 			if err != nil {
@@ -268,7 +274,7 @@ func viewExercises(cfg *config, day database.Day, user database.User) error {
 			}
 
 			fmt.Println("new exercise generated")
-			return viewExercises(cfg, day, user)
+			return viewExercises(cfg, day, user, numOfDays)
 		}
 	}
 
