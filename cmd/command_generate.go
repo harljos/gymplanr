@@ -17,7 +17,7 @@ var (
 	confirm         bool
 	exerciseType    string
 	difficulty      string
-	numOfDays       int
+	numOfDays       string
 	strengthMinutes string
 	cardioMinutes   string
 )
@@ -71,23 +71,21 @@ func generateCmd(cfg *config, user database.User) error {
 		).
 		Value(&difficulty)
 
-	daysPrompt := huh.NewSelect[int]().
-		Title("How many days a week do you want to work out?").
-		Options(
-			huh.NewOption("3", 3),
-			huh.NewOption("4", 4),
-			huh.NewOption("5", 5),
-			huh.NewOption("6", 6),
-		).
+	daysPrompt := huh.NewInput().
+		Title("How many days a week do you want to workout?").
+		Prompt("?").
+		Validate(isValidDays).
 		Value(&numOfDays)
 
 	cardioPrompt := huh.NewInput().
 		Title("How many minutes of cardio do you want to do?").
+		Prompt("?").
 		Validate(isInt).
 		Value(&cardioMinutes)
 
 	strengthPrompt := huh.NewInput().
 		Title("How many mintues do you want to do strength exercises for?").
+		Prompt("?").
 		Validate(isInt).
 		Value(&strengthMinutes)
 
@@ -139,7 +137,7 @@ func generateCmd(cfg *config, user database.User) error {
 
 	if user.Hostname.Valid {
 		err = spinner.New().
-			Title("Generating you workout plan...").
+			Title("Generating your workout plan...").
 			Action(func() {
 				generateWorkout(cfg, user, workoutDays)
 			}).
@@ -252,8 +250,23 @@ func isInt(s string) error {
 		return err
 	}
 
-	if num > 120 {
-		return errors.New("120 minutes is max")
+	if num > 120 || num < 10{
+		return errors.New("120 minutes is max, 1 is minimum")
+	}
+	return nil
+}
+
+func isValidDays(s string) error {
+	num, err := strconv.Atoi(s)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid syntax") {
+			return errors.New("please enter a whole number")
+		}
+		return err
+	}
+
+	if num > 7 || num < 1 {
+		return errors.New("enter a number 1-7")
 	}
 	return nil
 }

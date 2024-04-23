@@ -93,7 +93,25 @@ func getWorkoutDays() ([]Day, error) {
 	legMuscles := []string{"hamstrings", "glutes", "quadriceps", "calves"}
 
 	switch numOfDays {
-	case 3:
+	case "1":
+		return []Day{
+			{
+				dayName: "Monday",
+				muscles: checkOutOfBounds(fullBodyMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+		}, nil
+	case "2":
+		return []Day{
+			{
+				dayName: "Monday",
+				muscles: checkOutOfBounds(fullBodyMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+			{
+				dayName: "Thursday",
+				muscles: checkOutOfBounds(fullBodyMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+		}, nil
+	case "3":
 		return []Day{
 			{
 				dayName: "Monday",
@@ -108,7 +126,7 @@ func getWorkoutDays() ([]Day, error) {
 				muscles: checkOutOfBounds(fullBodyMuscles, int(math.Round(minutes/minPerExercise))),
 			},
 		}, nil
-	case 4:
+	case "4":
 		return []Day{
 			{
 				dayName: "Monday",
@@ -127,7 +145,7 @@ func getWorkoutDays() ([]Day, error) {
 				muscles: checkOutOfBounds(legMuscles, int(math.Round(minutes/minPerExercise))),
 			},
 		}, nil
-	case 5:
+	case "5":
 		return []Day{
 			{
 				dayName: "Monday",
@@ -150,8 +168,39 @@ func getWorkoutDays() ([]Day, error) {
 				muscles: checkOutOfBounds(pullMuscles, int(math.Round(minutes/minPerExercise))),
 			},
 		}, nil
-	case 6:
+	case "6":
 		return []Day{
+			{
+				dayName: "Monday",
+				muscles: checkOutOfBounds(pushMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+			{
+				dayName: "Tuesday",
+				muscles: checkOutOfBounds(pullMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+			{
+				dayName: "Wednesday",
+				muscles: checkOutOfBounds(legMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+			{
+				dayName: "Thursday",
+				muscles: checkOutOfBounds(pushMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+			{
+				dayName: "Friday",
+				muscles: checkOutOfBounds(pullMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+			{
+				dayName: "Saturday",
+				muscles: checkOutOfBounds(legMuscles, int(math.Round(minutes/minPerExercise))),
+			},
+		}, nil
+	case "7":
+		return []Day{
+			{
+				dayName: "Sunday",
+				muscles: checkOutOfBounds(fullBodyMuscles, int(math.Round(minutes/minPerExercise))),
+			},
 			{
 				dayName: "Monday",
 				muscles: checkOutOfBounds(pushMuscles, int(math.Round(minutes/minPerExercise))),
