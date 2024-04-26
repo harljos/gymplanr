@@ -32,6 +32,11 @@ func getCommands() map[string]cliCommand {
 			description: "View workout plan",
 			callback:    viewCmd,
 		},
+		"edit": {
+			name:        "edit",
+			description: "Edit workout plan",
+			callback:    editCmd,
+		},
 		"exit": {
 			name:        "exit",
 			description: "Exit gymplanr",

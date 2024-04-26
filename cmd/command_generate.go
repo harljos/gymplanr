@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
@@ -97,7 +99,8 @@ func generateCmd(cfg *config, user database.User) error {
 				daysPrompt,
 				strengthPrompt,
 			),
-		).Run()
+		).
+			Run()
 		if err != nil {
 			return err
 		}
@@ -147,6 +150,14 @@ func generateCmd(cfg *config, user database.User) error {
 		}
 	} else {
 		go generateWorkout(cfg, user, workoutDays)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		
+		err = spinner.New().Title("Generating your workout plan...").Context(ctx).Run()
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("Your workout plan has been generated use 'view' command to see it")
@@ -231,11 +242,11 @@ func generateCardioExercise(cfg *config, user database.User, day Day) {
 func getSetsAndReps() (int, int) {
 	switch difficulty {
 	case "beginner":
-		return 3, 6
+		return 3, 8
 	case "intermediate":
-		return 3, 12
+		return 3, 10
 	case "expert":
-		return 4, 12
+		return 4, 10
 	}
 
 	return 0, 0
@@ -250,7 +261,7 @@ func isInt(s string) error {
 		return err
 	}
 
-	if num > 120 || num < 10{
+	if num > 120 || num < 10 {
 		return errors.New("120 minutes is max, 1 is minimum")
 	}
 	return nil
