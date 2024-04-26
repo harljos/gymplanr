@@ -2,7 +2,7 @@
 
 ### This is gymplanr, a simple to use workout planner that will generate a full workout plan that fits your wants and needs, that requires no prior fitness knowledge.
 
-![gymplanr_demo](gymplanr_demo.gif)
+![gymplanr_demo](demo.gif)
 
 ## Motivation
 
@@ -60,7 +60,8 @@ gymplanr> view
 
 * help - help about any command
 * generate - generates workout plan
-* view - view workout plan and edit exercises
+* view - view workout plan
+* edit - edit exercises
 * login - logs in user
 * signUp - creates an account for gymplanr
 
@@ -69,6 +70,7 @@ gymplanr> view
 * help - displays information about all commands
 * generate - generates workout plan
 * view - view workout plan and edit exercises
+* edit - edit exercises
 * exit - exists session
 
 ## 🤝 Contributing
